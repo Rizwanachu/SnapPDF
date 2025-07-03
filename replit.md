@@ -8,8 +8,8 @@ This is a Flask-based web application that provides comprehensive PDF processing
 
 ### Backend Architecture
 - **Framework**: Flask web application with SQLAlchemy ORM
-- **Database**: PostgreSQL with SQLAlchemy models
-- **Authentication**: Replit Auth integration with OAuth support
+- **Database**: SQLite with SQLAlchemy models (local storage)
+- **Authentication**: Custom user authentication with Flask-Login
 - **Session Management**: Flask-Login for user session handling
 - **File Processing**: Background job queue system using threading
 
@@ -77,7 +77,7 @@ This is a Flask-based web application that provides comprehensive PDF processing
 ## Deployment Strategy
 
 ### Environment Configuration
-- Database URL via `DATABASE_URL` environment variable
+- SQLite database stored locally in `instance/pdf_tools.db`
 - Session secret via `SESSION_SECRET` environment variable
 - File size limits and processing constraints via app config
 
@@ -96,6 +96,20 @@ This is a Flask-based web application that provides comprehensive PDF processing
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+
+### July 03, 2025 - Database Migration & UX Improvements
+
+**Database Changes:**
+- Switched from PostgreSQL to SQLite for local storage
+- Database now stored in `instance/pdf_tools.db` for better portability
+- Removed PostgreSQL dependencies and configurations
+
+**User Experience Improvements:**
+- Removed annoying pop-up alerts and replaced with elegant toast notifications
+- Added comprehensive file validation with proper error messages
+- Added visual loading indicators during processing operations
+- Improved file display with detailed information and clear buttons
+- Enhanced workflow with better user feedback and progress tracking
 
 ### July 03, 2025 - Enhanced PDF Processing & UI Improvements
 

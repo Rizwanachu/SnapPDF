@@ -18,10 +18,9 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-# Configure the database
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+# Configure the database - using SQLite for local storage
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///pdf_tools.db"
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    "pool_recycle": 300,
     "pool_pre_ping": True,
 }
 
