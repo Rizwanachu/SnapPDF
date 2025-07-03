@@ -2,7 +2,7 @@ modules = ["python-3.11"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["openssl", "postgresql"]
+packages = ["freetype", "glibcLocales", "gumbo", "harfbuzz", "jbig2dec", "lcms2", "libimagequant", "libjpeg", "libjpeg_turbo", "libtiff", "libwebp", "libxcrypt", "mupdf", "openjpeg", "openssl", "postgresql", "swig", "tcl", "tesseract", "tk", "xcbuild", "zlib"]
 
 [deployment]
 deploymentTarget = "autoscale"
@@ -20,10 +20,6 @@ author = "agent"
 task = "workflow.run"
 args = "Start application"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "install_dependencies"
-
 [[workflows.workflow]]
 name = "Start application"
 author = "agent"
@@ -32,14 +28,6 @@ author = "agent"
 task = "shell.exec"
 args = "gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app"
 waitForPort = 5000
-
-[[workflows.workflow]]
-name = "install_dependencies"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "uv add PyPDF2 pdfplumber"
 
 [[ports]]
 localPort = 5000

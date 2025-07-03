@@ -1,100 +1,132 @@
-# DocumentToolkit - PDF Processing Application
+# PDF Tools Application
 
 ## Overview
 
-DocumentToolkit is a Flask-based web application that provides comprehensive PDF processing capabilities. The application allows users to upload PDF files and perform various operations including text extraction, metadata extraction, page splitting, and PDF merging. It features a modern Bootstrap-based UI with dark theme support and comprehensive error handling.
+This is a Flask-based web application that provides comprehensive PDF processing tools including merging, splitting, compression, OCR, and document conversion capabilities. The application features user authentication through Replit Auth, a job queue system for background processing, and a modern Bootstrap-based UI.
 
 ## System Architecture
 
-The application follows a traditional Flask MVC pattern with clear separation of concerns:
-
 ### Backend Architecture
-- **Flask Framework**: Core web framework providing routing, templating, and request handling
-- **Modular Design**: Separate modules for different functionalities (routes, utilities, validation)
-- **File Processing**: Dedicated PDF processing utilities using PyPDF2 and pdfplumber libraries
-- **Error Handling**: Comprehensive error handling with custom error pages and flash messaging
+- **Framework**: Flask web application with SQLAlchemy ORM
+- **Database**: PostgreSQL with SQLAlchemy models
+- **Authentication**: Replit Auth integration with OAuth support
+- **Session Management**: Flask-Login for user session handling
+- **File Processing**: Background job queue system using threading
 
 ### Frontend Architecture
-- **Bootstrap 5**: Modern responsive UI framework with dark theme support
-- **Vanilla JavaScript**: Client-side functionality for form handling and user interactions
-- **Font Awesome**: Icon library for enhanced UI elements
-- **Custom CSS**: Additional styling for PDF-specific UI components
+- **UI Framework**: Bootstrap 5 with responsive design
+- **JavaScript**: Vanilla JavaScript with modular class-based structure
+- **File Handling**: Drag-and-drop interface with progress tracking
+- **Real-time Updates**: AJAX-based queue status monitoring
 
 ## Key Components
 
-### Core Application (`app.py`)
-- Flask application initialization and configuration
-- File upload limits (50MB maximum)
-- Directory structure creation for uploads and temporary files
-- Global error handlers for common HTTP errors
+### Database Models
+- **User**: Core user model with premium status tracking (required for Replit Auth)
+- **OAuth**: OAuth token storage for authentication (required for Replit Auth)
+- **ProcessingJob**: Job tracking with status, progress, and file metadata
+- **JobType/JobStatus**: Enums for job categorization and state management
 
-### Routing Layer (`routes.py`)
-- Main application routes and request handling
-- File upload processing and validation
-- PDF operation dispatching
-- Response formatting and file serving
+### Processing Engine
+- **PDFProcessor**: Main processing class handling all PDF operations
+- **QueueManager**: Thread-based job queue with configurable worker limits
+- **Background Workers**: Dedicated threads for non-blocking file processing
 
-### PDF Processing (`utils/pdf_processor.py`)
-- Text extraction using multiple libraries (pdfplumber, PyPDF2)
-- Metadata extraction from PDF files
-- Page splitting functionality
-- PDF merging capabilities
-- Safety limits for large files (1000 pages max, 1MB text limit)
+### File Management
+- **Upload System**: Secure file upload with size limits and validation
+- **Storage Strategy**: Local filesystem with organized upload/processed directories
+- **Cleanup Utilities**: Automated file cleanup for storage management
 
-### File Validation (`utils/file_validator.py`)
-- Comprehensive file validation including:
-  - File type validation (PDF only)
-  - MIME type checking
-  - PDF signature verification
-  - File size limits (100 bytes minimum, 50MB maximum)
-  - Filename sanitization
-
-### Template System
-- **Base Template**: Common layout with navigation and Bootstrap integration
-- **Index Template**: Main upload interface with operation selection
-- **Result Template**: Results display with formatted output
+### Security Features
+- **Authentication**: OAuth-based user authentication
+- **File Validation**: PDF format validation and size restrictions
+- **Session Security**: Secure session management with proper timeouts
+- **User Limits**: Free tier restrictions (10MB per file, 5 files per batch)
 
 ## Data Flow
 
-1. **File Upload**: User selects PDF file(s) and operation type
-2. **Validation**: File validator checks file integrity, type, and size
-3. **Storage**: Valid files are saved to upload directory with secure filenames
-4. **Processing**: PDF processor performs requested operation
-5. **Results**: Processed results are displayed or offered for download
-6. **Cleanup**: Temporary files are managed through client-side cleanup functionality
+1. **User Authentication**: Users authenticate via Replit Auth OAuth flow
+2. **File Upload**: Files are uploaded and validated on the client side
+3. **Job Creation**: Processing jobs are created and queued in the database
+4. **Background Processing**: Worker threads pick up jobs from the queue
+5. **Progress Updates**: Real-time progress updates via AJAX polling
+6. **File Delivery**: Processed files are packaged and delivered via download links
 
 ## External Dependencies
 
-### Python Libraries
-- **Flask**: Web framework and templating
-- **PyPDF2**: PDF manipulation and text extraction
-- **pdfplumber**: Advanced PDF text extraction with layout awareness
-- **Werkzeug**: Security utilities for file handling
+### Python Packages
+- **Flask**: Web framework and core functionality
+- **SQLAlchemy**: Database ORM and migrations
+- **PyPDF2**: PDF manipulation and processing
+- **Pillow**: Image processing for OCR operations
+- **pytesseract**: OCR text extraction
+- **python-docx**: Word document processing
+- **openpyxl**: Excel file handling
+- **reportlab**: PDF generation capabilities
 
-### Frontend Dependencies
-- **Bootstrap 5**: UI framework (CDN)
-- **Font Awesome**: Icon library (CDN)
-- **Custom CSS/JS**: Application-specific styling and functionality
+### Frontend Libraries
+- **Bootstrap 5**: UI framework and components
+- **Font Awesome**: Icon library
+- **Vanilla JavaScript**: No external JS frameworks
+
+### Authentication
+- **Flask-Dance**: OAuth integration
+- **Flask-Login**: Session management
+- **Replit Auth**: Primary authentication provider
 
 ## Deployment Strategy
 
-The application is configured for development and production environments:
+### Environment Configuration
+- Database URL via `DATABASE_URL` environment variable
+- Session secret via `SESSION_SECRET` environment variable
+- File size limits and processing constraints via app config
 
-### Development
-- Debug mode enabled
-- Local file storage in `uploads/` and `temp/` directories
-- Environment-based configuration using `SESSION_SECRET`
+### File Storage
+- Local filesystem storage with configurable directories
+- Automatic directory creation for uploads and processed files
+- Built-in cleanup mechanisms for temporary files
 
-### Production Considerations
-- File size limits enforced at application level
-- Secure filename handling
-- Error logging configured
-- Session management with configurable secret key
-
-## Changelog
-
-- July 03, 2025. Initial setup
+### Scalability Considerations
+- Configurable worker thread pool (currently set to 2 workers)
+- Database connection pooling with health checks
+- File size and batch processing limits for resource management
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+## Recent Changes
+
+### July 03, 2025 - Enhanced PDF Processing & UI Improvements
+
+**PDF Algorithm Enhancements:**
+- Enhanced compression with adjustable quality settings (low/medium/high)
+- Advanced OCR with multi-language support and dual output formats (txt/PDF/both)
+- Improved text extraction with PyMuPDF integration for better accuracy
+- Added preview functionality for uploaded PDF files
+- Enhanced file information display with metadata extraction
+
+**User Interface Improvements:**
+- Redesigned landing page with cleaner, minimalist design
+- Added compression quality settings interface (high/medium/maximum compression)
+- Enhanced OCR interface with language selection and output format options
+- Added PDF preview and file info modals for better user experience
+- Improved file upload display with preview and info buttons
+- Streamlined features section for better readability
+
+**Technical Improvements:**
+- Added PyMuPDF for better PDF to image conversion
+- Enhanced JavaScript with preview and file info functionality
+- Improved error handling and user feedback
+- Added new API endpoints for file preview and metadata
+
+**Architecture Updates:**
+- Added `/preview/<file_id>` endpoint for PDF previews
+- Added `/file-info/<file_id>` endpoint for detailed file information
+- Enhanced PDF processing settings support in job configuration
+- Improved modular JavaScript structure for better maintainability
+
+## Changelog
+
+- July 03, 2025. Initial setup
+- July 03, 2025. Enhanced PDF processing algorithms and improved UI

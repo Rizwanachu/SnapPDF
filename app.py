@@ -1,35 +1,51 @@
 import os
 import logging
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
-# Create Flask app
+class Base(DeclarativeBase):
+    pass
+
+db = SQLAlchemy(model_class=Base)
+
+# Create the app
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-change-in-production")
+app.secret_key = os.environ.get("SESSION_SECRET")
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-# Configuration
-app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['TEMP_FOLDER'] = 'temp'
+# Configure the database
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_recycle": 300,
+    "pool_pre_ping": True,
+}
 
-# Create necessary directories
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-os.makedirs(app.config['TEMP_FOLDER'], exist_ok=True)
+# App configuration
+app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB max file size
+app.config["UPLOAD_FOLDER"] = "uploads"
+app.config["PROCESSED_FOLDER"] = "processed"
+app.config["FREE_USER_FILE_LIMIT"] = 10 * 1024 * 1024  # 10MB per file for free users
+app.config["FREE_USER_BATCH_LIMIT"] = 5  # 5 files per batch for free users
 
-# Import routes after app creation
-from routes import *
+# Initialize the app with the extension
+db.init_app(app)
 
-# Error handlers
-@app.errorhandler(413)
-def too_large(e):
-    return render_template('index.html', error="File too large. Maximum size is 50MB."), 413
+# Create upload and processed directories
+os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+os.makedirs(app.config["PROCESSED_FOLDER"], exist_ok=True)
 
-@app.errorhandler(404)
-def not_found(e):
-    return render_template('index.html', error="Page not found."), 404
-
-@app.errorhandler(500)
-def server_error(e):
-    return render_template('index.html', error="Internal server error. Please try again."), 500
+with app.app_context():
+    # Import models to create tables
+    import models  # noqa: F401
+    db.create_all()
+    logging.info("Database tables created")
+    
+    # Cleanup old files on startup
+    from utils import cleanup_old_files
+    cleanup_old_files(app.config['UPLOAD_FOLDER'])
+    cleanup_old_files(app.config['PROCESSED_FOLDER'])
