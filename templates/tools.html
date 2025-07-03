@@ -265,7 +265,9 @@ function updateUploadArea() {
 
 function clearFiles() {
     uploadedFiles = [];
+    selectedTool = null;
     document.getElementById('fileInput').value = '';
+    
     const uploadArea = document.getElementById('uploadArea');
     uploadArea.innerHTML = `
         <i class="fas fa-cloud-upload-alt mb-3" style="font-size: 3rem; color: #6c757d;"></i>
@@ -277,6 +279,16 @@ function clearFiles() {
             </small>
         </div>
     `;
+    
+    // Re-attach event listeners
+    const fileInput = document.getElementById('fileInput');
+    fileInput.removeEventListener('change', handleFileSelect);
+    fileInput.addEventListener('change', handleFileSelect);
+    
+    // Re-attach drag and drop listeners
+    setupDragAndDrop();
+    
+    showMessage('Files cleared successfully', 'info');
 }
 
 function selectTool(tool) {
@@ -429,24 +441,39 @@ function setProcessingState(processing) {
     }
 }
 
-// Drag and drop functionality
-const uploadArea = document.getElementById('uploadArea');
+function setupDragAndDrop() {
+    const uploadArea = document.getElementById('uploadArea');
+    if (!uploadArea) return;
 
-uploadArea.addEventListener('dragover', (e) => {
+    // Remove existing listeners
+    uploadArea.removeEventListener('dragover', handleDragOver);
+    uploadArea.removeEventListener('dragleave', handleDragLeave);
+    uploadArea.removeEventListener('drop', handleDrop);
+
+    // Add new listeners
+    uploadArea.addEventListener('dragover', handleDragOver);
+    uploadArea.addEventListener('dragleave', handleDragLeave);
+    uploadArea.addEventListener('drop', handleDrop);
+}
+
+function handleDragOver(e) {
     e.preventDefault();
-    uploadArea.classList.add('dragover');
-});
+    e.currentTarget.classList.add('dragover');
+}
 
-uploadArea.addEventListener('dragleave', () => {
-    uploadArea.classList.remove('dragover');
-});
+function handleDragLeave(e) {
+    e.currentTarget.classList.remove('dragover');
+}
 
-uploadArea.addEventListener('drop', (e) => {
+function handleDrop(e) {
     e.preventDefault();
-    uploadArea.classList.remove('dragover');
+    e.currentTarget.classList.remove('dragover');
     
     const files = Array.from(e.dataTransfer.files);
     uploadFiles(files);
-});
+}
+
+// Initialize drag and drop on page load
+setupDragAndDrop();
 </script>
 {% endblock %}
