@@ -266,13 +266,19 @@ function updateUploadArea() {
 function clearFiles() {
     uploadedFiles = [];
     selectedTool = null;
-    document.getElementById('fileInput').value = '';
+    
+    // Clear the file input value safely
+    const fileInput = document.getElementById('fileInput');
+    if (fileInput) {
+        fileInput.value = '';
+    }
     
     const uploadArea = document.getElementById('uploadArea');
     uploadArea.innerHTML = `
         <i class="fas fa-cloud-upload-alt mb-3" style="font-size: 3rem; color: #6c757d;"></i>
         <h5>Drag & Drop PDF Files</h5>
         <p class="text-muted">or <button class="btn btn-outline-primary" onclick="document.getElementById('fileInput').click()">Browse Files</button></p>
+        <input type="file" id="fileInput" multiple accept=".pdf" style="display: none;">
         <div class="mt-3">
             <small class="text-muted">
                 Maximum file size: 10MB per file (Free) | Maximum 5 files per batch (Free)
@@ -280,13 +286,16 @@ function clearFiles() {
         </div>
     `;
     
-    // Re-attach event listeners
-    const fileInput = document.getElementById('fileInput');
-    fileInput.removeEventListener('change', handleFileSelect);
-    fileInput.addEventListener('change', handleFileSelect);
-    
-    // Re-attach drag and drop listeners
-    setupDragAndDrop();
+    // Re-attach event listeners after the DOM is updated
+    setTimeout(() => {
+        const newFileInput = document.getElementById('fileInput');
+        if (newFileInput) {
+            newFileInput.addEventListener('change', handleFileSelect);
+        }
+        
+        // Re-attach drag and drop listeners
+        setupDragAndDrop();
+    }, 0);
     
     showMessage('Files cleared successfully', 'info');
 }
