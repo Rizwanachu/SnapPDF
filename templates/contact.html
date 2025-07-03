@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - PDF Tools{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+                    <h1 class="mb-4">Contact Us</h1>
+                    <p class="lead mb-4">We'd love to hear from you. Get in touch with us for any questions or support.</p>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-envelope text-primary mb-3" style="font-size: 3rem;"></i>
+                                    <h5>Email Support</h5>
+                                    <p class="text-muted">Get help with your PDF processing needs</p>
+                                    <a href="mailto:support@pdftools.com" class="btn btn-primary">Send Email</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-question-circle text-success mb-3" style="font-size: 3rem;"></i>
+                                    <h5>FAQ</h5>
+                                    <p class="text-muted">Find answers to common questions</p>
+                                    <a href="#" class="btn btn-success">View FAQ</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5>Common Questions</h5>
+                                    <div class="accordion" id="faqAccordion">
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                                    What file formats do you support?
+                                                </button>
+                                            </h2>
+                                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                                <div class="accordion-body">
+                                                    We primarily support PDF files for processing. We can convert PDFs to Word and Excel formats.
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                                    Is my data secure?
+                                                </button>
+                                            </h2>
+                                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                                <div class="accordion-body">
+                                                    Yes, we take security seriously. All files are processed securely and automatically deleted after 24 hours.
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                                    What are the file size limits?
+                                                </button>
+                                            </h2>
+                                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                                <div class="accordion-body">
+                                                    Free accounts can process files up to 10MB each, with a maximum of 5 files per batch.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

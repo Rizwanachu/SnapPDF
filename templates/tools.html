@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block title %}PDF Tools - Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">PDF Processing Tools</h1>
+                <div>
+                    <span class="badge bg-primary">Welcome, {{ user.first_name }}!</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Upload Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Upload Files</h5>
+                </div>
+                <div class="card-body">
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt mb-3" style="font-size: 3rem; color: #6c757d;"></i>
+                        <h5>Drag & Drop PDF Files</h5>
+                        <p class="text-muted">or <button class="btn btn-outline-primary" onclick="document.getElementById('fileInput').click()">Browse Files</button></p>
+                        <input type="file" id="fileInput" multiple accept=".pdf" style="display: none;">
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                Maximum file size: 10MB per file (Free) | Maximum 5 files per batch (Free)
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Tools -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="mb-3">Processing Options</h4>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card tool-card h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-layer-group text-primary mb-3" style="font-size: 2.5rem;"></i>
+                            <h5 class="card-title">Merge PDFs</h5>
+                            <p class="card-text">Combine multiple PDF files into one document</p>
+                            <button class="btn btn-primary" onclick="selectTool('merge')">Select</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card tool-card h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-cut text-success mb-3" style="font-size: 2.5rem;"></i>
+                            <h5 class="card-title">Split PDFs</h5>
+                            <p class="card-text">Split PDF into individual pages</p>
+                            <button class="btn btn-success" onclick="selectTool('split')">Select</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card tool-card h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-compress text-warning mb-3" style="font-size: 2.5rem;"></i>
+                            <h5 class="card-title">Compress PDFs</h5>
+                            <p class="card-text">Reduce file size while maintaining quality</p>
+                            <button class="btn btn-warning" onclick="selectTool('compress')">Select</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card tool-card h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-eye text-info mb-3" style="font-size: 2.5rem;"></i>
+                            <h5 class="card-title">OCR Text Extraction</h5>
+                            <p class="card-text">Extract text from scanned PDFs</p>
+                            <button class="btn btn-info" onclick="selectTool('ocr')">Select</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card tool-card h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-file-word text-primary mb-3" style="font-size: 2.5rem;"></i>
+                            <h5 class="card-title">Convert to Word</h5>
+                            <p class="card-text">Convert PDF to editable Word document</p>
+                            <button class="btn btn-primary" onclick="selectTool('convert_word')">Select</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card tool-card h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-file-excel text-success mb-3" style="font-size: 2.5rem;"></i>
+                            <h5 class="card-title">Convert to Excel</h5>
+                            <p class="card-text">Convert PDF tables to Excel spreadsheet</p>
+                            <button class="btn btn-success" onclick="selectTool('convert_excel')">Select</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Jobs -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Recent Jobs</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_jobs %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Job Type</th>
+                                        <th>Status</th>
+                                        <th>Progress</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for job in recent_jobs %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ job.job_type.value.title() }}</span>
+                                        </td>
+                                        <td>
+                                            {% if job.status.value == 'completed' %}
+                                                <span class="badge bg-success">{{ job.status.value.title() }}</span>
+                                            {% elif job.status.value == 'failed' %}
+                                                <span class="badge bg-danger">{{ job.status.value.title() }}</span>
+                                            {% elif job.status.value == 'processing' %}
+                                                <span class="badge bg-info">{{ job.status.value.title() }}</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">{{ job.status.value.title() }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar" role="progressbar" style="width: {{ job.progress }}%">
+                                                    {{ job.progress }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ job.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            {% if job.status.value == 'completed' %}
+                                                <a href="{{ url_for('download_job_results', job_id=job.id) }}" class="btn btn-sm btn-success">
+                                                    <i class="fas fa-download"></i> Download
+                                                </a>
+                                            {% elif job.status.value in ['pending', 'processing'] %}
+                                                <button class="btn btn-sm btn-warning" onclick="cancelJob('{{ job.id }}')">
+                                                    <i class="fas fa-times"></i> Cancel
+                                                </button>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-history text-muted mb-3" style="font-size: 3rem;"></i>
+                            <h5>No recent jobs</h5>
+                            <p class="text-muted">Upload files and process them to see your job history</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let selectedTool = null;
+let uploadedFiles = [];
+
+// File upload handling
+document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+function handleFileSelect(event) {
+    const files = Array.from(event.target.files);
+    uploadFiles(files);
+}
+
+function uploadFiles(files) {
+    // Simple file upload - in a real app, this would be more robust
+    uploadedFiles = files;
+    updateUploadArea();
+}
+
+function updateUploadArea() {
+    const uploadArea = document.getElementById('uploadArea');
+    if (uploadedFiles.length > 0) {
+        uploadArea.innerHTML = `
+            <i class="fas fa-check-circle text-success mb-3" style="font-size: 3rem;"></i>
+            <h5>Files Selected (${uploadedFiles.length})</h5>
+            <p class="text-muted">Choose a processing tool to continue</p>
+        `;
+    }
+}
+
+function selectTool(tool) {
+    selectedTool = tool;
+    
+    if (uploadedFiles.length === 0) {
+        alert('Please upload files first');
+        return;
+    }
+    
+    // Process files
+    processFiles();
+}
+
+function processFiles() {
+    const formData = new FormData();
+    
+    // Add files
+    for (let file of uploadedFiles) {
+        formData.append('files', file);
+    }
+    
+    // Add job type
+    formData.append('job_type', selectedTool);
+    
+    // Submit to server
+    fetch('/process-files', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Processing started! Job ID: ' + data.job_id);
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while processing files');
+    });
+}
+
+function cancelJob(jobId) {
+    if (confirm('Are you sure you want to cancel this job?')) {
+        fetch(`/cancel-job/${jobId}`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Job cancelled successfully');
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while cancelling the job');
+        });
+    }
+}
+
+// Drag and drop functionality
+const uploadArea = document.getElementById('uploadArea');
+
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('dragover');
+});
+
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('dragover');
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    
+    const files = Array.from(e.dataTransfer.files);
+    uploadFiles(files);
+});
+</script>
+{% endblock %}

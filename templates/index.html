@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}PDF Tools - Professional PDF Processing{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Professional PDF Tools</h1>
+                <p class="lead mb-4">Merge, split, compress, and convert your PDF documents with our powerful online tools. Fast, secure, and easy to use.</p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                    <a href="{{ url_for('register') }}" class="btn btn-light btn-lg px-4 me-md-2">Get Started</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-4">Sign In</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <i class="fas fa-file-pdf" style="font-size: 150px; opacity: 0.8;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-12 text-center mb-5">
+            <h2 class="display-5 fw-bold">Powerful PDF Processing Tools</h2>
+            <p class="lead text-muted">Everything you need to work with PDF documents</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-layer-group text-primary mb-3" style="font-size: 3rem;"></i>
+                    <h5 class="card-title">Merge PDFs</h5>
+                    <p class="card-text">Combine multiple PDF files into a single document with preserved quality and formatting.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-cut text-success mb-3" style="font-size: 3rem;"></i>
+                    <h5 class="card-title">Split PDFs</h5>
+                    <p class="card-text">Extract specific pages or split large documents into smaller, manageable files.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-compress text-warning mb-3" style="font-size: 3rem;"></i>
+                    <h5 class="card-title">Compress PDFs</h5>
+                    <p class="card-text">Reduce file size without losing quality with our advanced compression algorithms.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-eye text-info mb-3" style="font-size: 3rem;"></i>
+                    <h5 class="card-title">OCR Text Extraction</h5>
+                    <p class="card-text">Extract text from scanned PDFs using advanced optical character recognition.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-file-word text-primary mb-3" style="font-size: 3rem;"></i>
+                    <h5 class="card-title">Convert to Word</h5>
+                    <p class="card-text">Convert PDF documents to editable Word format while maintaining structure.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-file-excel text-success mb-3" style="font-size: 3rem;"></i>
+                    <h5 class="card-title">Convert to Excel</h5>
+                    <p class="card-text">Transform PDF tables and data into Excel spreadsheets for analysis.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works Section -->
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">How It Works</h2>
+                <p class="lead text-muted">Simple steps to process your PDF documents</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <i class="fas fa-upload text-white"></i>
+                    </div>
+                    <h5>1. Upload Files</h5>
+                    <p class="text-muted">Upload your PDF files securely to our platform</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <i class="fas fa-cogs text-white"></i>
+                    </div>
+                    <h5>2. Choose Tool</h5>
+                    <p class="text-muted">Select the processing tool that fits your needs</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <i class="fas fa-download text-white"></i>
+                    </div>
+                    <h5>3. Download Result</h5>
+                    <p class="text-muted">Download your processed files instantly</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto text-center">
+            <h2 class="display-5 fw-bold mb-4">Ready to Get Started?</h2>
+            <p class="lead mb-4">Join thousands of users who trust our PDF processing tools for their document needs.</p>
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-4">Create Free Account</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
