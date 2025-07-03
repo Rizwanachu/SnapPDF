@@ -73,6 +73,15 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('tools') }}">Tools</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('premium') }}">
+                                {% if current_user.has_active_subscription() %}
+                                    <i class="fas fa-crown text-warning"></i> Premium
+                                {% else %}
+                                    <i class="fas fa-star"></i> Go Premium
+                                {% endif %}
+                            </a>
+                        </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                                 {{ current_user.first_name }} {{ current_user.last_name }}

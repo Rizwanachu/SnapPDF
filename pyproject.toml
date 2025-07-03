@@ -24,4 +24,6 @@ dependencies = [
     "pymupdf>=1.26.3",
     "flask-wtf>=1.2.2",
     "wtforms>=3.2.1",
+    "requests>=2.32.4",
+    "paypalrestsdk>=1.13.3",
 ]

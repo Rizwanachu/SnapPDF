@@ -281,7 +281,11 @@ function clearFiles() {
         <input type="file" id="fileInput" multiple accept=".pdf" style="display: none;">
         <div class="mt-3">
             <small class="text-muted">
-                Maximum file size: 10MB per file (Free) | Maximum 5 files per batch (Free)
+                {% if current_user.has_active_subscription() %}
+                    <i class="fas fa-crown text-warning"></i> Premium: Unlimited files, no size restrictions
+                {% else %}
+                    Maximum file size: 10MB per file (Free) | Maximum 5 files per batch (Free)
+                {% endif %}
             </small>
         </div>
     `;

@@ -2,12 +2,12 @@ import os
 import json
 import uuid
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import session, render_template, request, redirect, url_for, flash, jsonify, send_file, abort, Response
 from werkzeug.utils import secure_filename
 from flask_login import current_user, login_user, logout_user, login_required
 from app import app, db
-from models import ProcessingJob, JobStatus, JobType, FileUpload, User
+from models import ProcessingJob, JobStatus, JobType, FileUpload, User, Subscription, SubscriptionStatus
 from forms import RegistrationForm, LoginForm
 from queue_manager import get_queue_manager, start_queue_manager
 from pdf_processor import create_zip_archive
@@ -489,3 +489,142 @@ def cleanup_files():
     from utils import cleanup_old_files
     cleanup_old_files(app.config['UPLOAD_FOLDER'])
     cleanup_old_files(app.config['PROCESSED_FOLDER'])
+
+# PayPal Configuration
+PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT_ID', 'your_paypal_client_id')
+PAYPAL_CLIENT_SECRET = os.environ.get('PAYPAL_CLIENT_SECRET', 'your_paypal_client_secret')
+
+# Configure PayPal (sandbox mode)
+import paypalrestsdk
+paypalrestsdk.configure({
+    "mode": "sandbox",  # Change to "live" for production
+    "client_id": PAYPAL_CLIENT_ID,
+    "client_secret": PAYPAL_CLIENT_SECRET
+})
+
+@app.route('/premium')
+@login_required
+def premium():
+    """Premium subscription page"""
+    user_subscription = current_user.get_active_subscription()
+    return render_template('premium.html', 
+                         user=current_user, 
+                         subscription=user_subscription)
+
+@app.route('/subscribe', methods=['POST'])
+@login_required
+def create_paypal_payment():
+    """Create PayPal payment for subscription"""
+    try:
+        # Create PayPal payment
+        payment = paypalrestsdk.Payment({
+            "intent": "sale",
+            "payer": {
+                "payment_method": "paypal"
+            },
+            "redirect_urls": {
+                "return_url": url_for('subscription_success', _external=True),
+                "cancel_url": url_for('subscription_cancel', _external=True)
+            },
+            "transactions": [{
+                "item_list": {
+                    "items": [{
+                        "name": "PDF Tools Premium Monthly",
+                        "sku": "premium-monthly",
+                        "price": "9.99",
+                        "currency": "USD",
+                        "quantity": 1
+                    }]
+                },
+                "amount": {
+                    "total": "9.99",
+                    "currency": "USD"
+                },
+                "description": "Premium PDF processing subscription with unlimited features"
+            }]
+        })
+
+        if payment.create():
+            # Store payment info in session
+            session['payment_id'] = payment.id
+            
+            # Find approval URL
+            for link in payment.links:
+                if link.rel == "approval_url":
+                    return redirect(link.href)
+        else:
+            flash('Error creating PayPal payment. Please try again.', 'error')
+            return redirect(url_for('premium'))
+            
+    except Exception as e:
+        logger.error(f"PayPal payment creation error: {e}")
+        flash('Payment system error. Please try again later.', 'error')
+        return redirect(url_for('premium'))
+
+@app.route('/subscription/success')
+@login_required
+def subscription_success():
+    """Handle successful PayPal payment"""
+    payment_id = session.get('payment_id')
+    payer_id = request.args.get('PayerID')
+    
+    if not payment_id or not payer_id:
+        flash('Invalid payment session.', 'error')
+        return redirect(url_for('premium'))
+    
+    try:
+        # Execute the payment
+        payment = paypalrestsdk.Payment.find(payment_id)
+        if payment.execute({"payer_id": payer_id}):
+            # Create subscription record
+            subscription = Subscription(
+                id=str(uuid.uuid4()),
+                user_id=current_user.id,
+                paypal_subscription_id=payment_id,
+                status=SubscriptionStatus.ACTIVE,
+                activated_at=datetime.now(),
+                expires_at=datetime.now() + timedelta(days=30)  # Monthly subscription
+            )
+            
+            db.session.add(subscription)
+            
+            # Update user premium status
+            current_user.is_premium = True
+            db.session.commit()
+            
+            flash('Welcome to Premium! You now have unlimited PDF processing.', 'success')
+            return redirect(url_for('tools'))
+        else:
+            flash('Payment execution failed. Please contact support.', 'error')
+            return redirect(url_for('premium'))
+            
+    except Exception as e:
+        logger.error(f"Payment execution error: {e}")
+        flash('Error processing payment. Please contact support.', 'error')
+        return redirect(url_for('premium'))
+
+@app.route('/subscription/cancel')
+@login_required
+def subscription_cancel():
+    """Handle cancelled PayPal payment"""
+    flash('Payment was cancelled.', 'info')
+    return redirect(url_for('premium'))
+
+@app.route('/cancel-subscription', methods=['POST'])
+@login_required
+def cancel_subscription():
+    """Cancel user subscription"""
+    try:
+        subscription = current_user.get_active_subscription()
+        if subscription:
+            subscription.cancel()
+            current_user.is_premium = False
+            db.session.commit()
+            flash('Subscription cancelled successfully.', 'info')
+        else:
+            flash('No active subscription found.', 'error')
+    except Exception as e:
+        logger.error(f"Subscription cancellation error: {e}")
+        flash('Error cancelling subscription. Please contact support.', 'error')
+    
+    return redirect(url_for('premium'))

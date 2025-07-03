@@ -21,6 +21,12 @@ class JobType(Enum):
     CONVERT_WORD = "convert_word"
     CONVERT_EXCEL = "convert_excel"
 
+class SubscriptionStatus(Enum):
+    ACTIVE = "active"
+    CANCELLED = "cancelled"
+    EXPIRED = "expired"
+    PENDING = "pending"
+
 # (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -49,6 +55,23 @@ class User(UserMixin, db.Model):
     def get_id(self):
         """Return user id as string for Flask-Login"""
         return str(self.id)
+    
+    def has_active_subscription(self):
+        """Check if user has an active premium subscription"""
+        if self.is_premium:
+            return True
+        
+        for subscription in self.subscriptions:
+            if subscription.is_active():
+                return True
+        return False
+    
+    def get_active_subscription(self):
+        """Get the user's active subscription if any"""
+        for subscription in self.subscriptions:
+            if subscription.is_active():
+                return subscription
+        return None
 
 # (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
 class OAuth(OAuthConsumerMixin, db.Model):
@@ -105,3 +128,34 @@ class FileUpload(db.Model):
     
     # Relationship with user
     user = db.relationship('User', backref='uploaded_files')
+
+class Subscription(db.Model):
+    __tablename__ = 'subscriptions'
+    
+    id = db.Column(db.String, primary_key=True)
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), nullable=False)
+    paypal_agreement_id = db.Column(db.String, unique=True, nullable=True)
+    paypal_subscription_id = db.Column(db.String, unique=True, nullable=True)
+    status = db.Column(db.Enum(SubscriptionStatus), default=SubscriptionStatus.PENDING)
+    plan_name = db.Column(db.String, default="Premium Monthly")
+    amount = db.Column(db.Float, default=9.99)
+    currency = db.Column(db.String, default="USD")
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    activated_at = db.Column(db.DateTime, nullable=True)
+    cancelled_at = db.Column(db.DateTime, nullable=True)
+    expires_at = db.Column(db.DateTime, nullable=True)
+    
+    # Relationships
+    user = db.relationship('User', backref='subscriptions')
+    
+    def is_active(self):
+        """Check if subscription is currently active"""
+        return (self.status == SubscriptionStatus.ACTIVE and 
+                (self.expires_at is None or self.expires_at > datetime.now()))
+    
+    def cancel(self):
+        """Cancel the subscription"""
+        self.status = SubscriptionStatus.CANCELLED
+        self.cancelled_at = datetime.now()
