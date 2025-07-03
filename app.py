@@ -49,3 +49,6 @@ with app.app_context():
     from utils import cleanup_old_files
     cleanup_old_files(app.config['UPLOAD_FOLDER'])
     cleanup_old_files(app.config['PROCESSED_FOLDER'])
+
+# Import routes after app is configured
+import routes  # noqa: F401

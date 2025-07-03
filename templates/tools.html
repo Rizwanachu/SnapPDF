@@ -231,24 +231,41 @@ function selectTool(tool) {
 }
 
 function processFiles() {
+    // First upload the files
     const formData = new FormData();
-    
-    // Add files
     for (let file of uploadedFiles) {
         formData.append('files', file);
     }
     
-    // Add job type
-    formData.append('job_type', selectedTool);
-    
-    // Submit to server
-    fetch('/process-files', {
+    // Upload files first
+    fetch('/upload', {
         method: 'POST',
         body: formData
     })
     .then(response => response.json())
     .then(data => {
-        if (data.success) {
+        if (data.files) {
+            // Files uploaded successfully, now process them
+            const fileIds = data.files.map(file => file.id);
+            
+            // Create processing job
+            return fetch('/process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    job_type: selectedTool,
+                    file_ids: fileIds
+                })
+            });
+        } else {
+            throw new Error(data.error || 'Upload failed');
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.job_id) {
             alert('Processing started! Job ID: ' + data.job_id);
             location.reload();
         } else {
@@ -257,7 +274,7 @@ function processFiles() {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while processing files');
+        alert('An error occurred: ' + error.message);
     });
 }
 
