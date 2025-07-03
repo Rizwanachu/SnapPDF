@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Processing Results - DocumentToolkit{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-lg">
+            <div class="card-header bg-success text-white">
+                <h2 class="card-title mb-0">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Processing Complete
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success" role="alert">
+                    <i class="fas fa-file-pdf me-2"></i>
+                    Successfully processed: <strong>{{ filename }}</strong>
+                </div>
+
+                {% if operation == 'extract_text' %}
+                    {% if result.success %}
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">
+                                            <i class="fas fa-file-alt text-primary"></i>
+                                        </h5>
+                                        <h3 class="text-primary">{{ result.page_count }}</h3>
+                                        <p class="card-text">Pages</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">
+                                            <i class="fas fa-font text-success"></i>
+                                        </h5>
+                                        <h3 class="text-success">{{ result.character_count }}</h3>
+                                        <p class="card-text">Characters</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">
+                                            <i class="fas fa-align-left text-info"></i>
+                                        </h5>
+                                        <h3 class="text-info">{{ result.text.split('\n')|length }}</h3>
+                                        <p class="card-text">Lines</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h4><i class="fas fa-file-alt me-2"></i>Extracted Text</h4>
+                        <div class="card">
+                            <div class="card-body">
+                                <pre class="text-content">{{ result.text }}</pre>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {{ result.error }}
+                        </div>
+                    {% endif %}
+
+                {% elif operation == 'extract_metadata' %}
+                    {% if result.success %}
+                        <h4><i class="fas fa-info-circle me-2"></i>PDF Metadata</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Document Information</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table table-striped">
+                                            <tr>
+                                                <td><strong>Title:</strong></td>
+                                                <td>{{ result.metadata.title }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Author:</strong></td>
+                                                <td>{{ result.metadata.author }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Subject:</strong></td>
+                                                <td>{{ result.metadata.subject }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Creator:</strong></td>
+                                                <td>{{ result.metadata.creator }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Producer:</strong></td>
+                                                <td>{{ result.metadata.producer }}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">File Properties</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table table-striped">
+                                            <tr>
+                                                <td><strong>Pages:</strong></td>
+                                                <td>{{ result.metadata.page_count }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>File Size:</strong></td>
+                                                <td>{{ "%.2f"|format(result.metadata.file_size / 1024 / 1024) }} MB</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Encrypted:</strong></td>
+                                                <td>{{ "Yes" if result.metadata.encrypted else "No" }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Creation Date:</strong></td>
+                                                <td>{{ result.metadata.creation_date }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Modified Date:</strong></td>
+                                                <td>{{ result.metadata.modification_date }}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {{ result.error }}
+                        </div>
+                    {% endif %}
+
+                {% elif operation == 'split_pages' %}
+                    {% if result.success %}
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">
+                                            <i class="fas fa-file-alt text-primary"></i>
+                                        </h5>
+                                        <h3 class="text-primary">{{ result.page_count }}</h3>
+                                        <p class="card-text">Pages Split</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">
+                                            <i class="fas fa-file-archive text-success"></i>
+                                        </h5>
+                                        <h3 class="text-success">ZIP</h3>
+                                        <p class="card-text">Archive Created</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            All {{ result.page_count }} pages have been split into individual PDF files and compressed into a ZIP archive.
+                        </div>
+                        
+                        <div class="text-center">
+                            <a href="{{ url_for('download_file', filename=result.zip_file) }}" class="btn btn-success btn-lg">
+                                <i class="fas fa-download me-2"></i>Download ZIP Archive
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {{ result.error }}
+                        </div>
+                    {% endif %}
+
+                {% elif operation == 'merge_pdfs' %}
+                    {% if result.success %}
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">
+                                            <i class="fas fa-layer-group text-primary"></i>
+                                        </h5>
+                                        <h3 class="text-primary">{{ result.source_files|length }}</h3>
+                                        <p class="card-text">Files Merged</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">
+                                            <i class="fas fa-file-alt text-success"></i>
+                                        </h5>
+                                        <h3 class="text-success">{{ result.total_pages }}</h3>
+                                        <p class="card-text">Total Pages</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">
+                                            <i class="fas fa-file-pdf text-danger"></i>
+                                        </h5>
+                                        <h3 class="text-danger">1</h3>
+                                        <p class="card-text">Output File</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Source Files</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group">
+                                    {% for file in result.source_files %}
+                                        <li class="list-group-item">
+                                            <i class="fas fa-file-pdf text-danger me-2"></i>
+                                            {{ file }}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <a href="{{ url_for('download_file', filename=result.output_file) }}" class="btn btn-success btn-lg">
+                                <i class="fas fa-download me-2"></i>Download Merged PDF
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {{ result.error }}
+                        </div>
+                    {% endif %}
+                {% endif %}
+
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Process Another File
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
