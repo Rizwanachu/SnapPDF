@@ -113,7 +113,7 @@
                         </div>
                     </div>
                     <div class="col-6 col-md-4 col-lg-3">
-                        <div class="card tool-card h-100 border-0 shadow-sm" onclick="document.getElementById('cameraInput').click()">
+                        <div class="card tool-card h-100 border-0 shadow-sm" onclick="const cam = document.getElementById('cameraInput'); if(cam) cam.click();">
                             <div class="card-body p-3">
                                 <i class="fas fa-camera text-danger mb-2 fs-4"></i>
                                 <h6 class="mb-1">Scan to PDF</h6>
@@ -450,18 +450,31 @@ let selectedTool = null;
 let uploadedFiles = [];
 
 // File upload handling
-document.getElementById('fileInput').addEventListener('change', handleFileSelect);
-document.getElementById('cameraInput').addEventListener('change', (e) => {
+const fileInputInitial = document.getElementById('fileInput');
+const cameraInputInitial = document.getElementById('cameraInput');
+
+if (fileInputInitial) {
+    fileInputInitial.addEventListener('change', handleFileSelect);
+}
+
+if (cameraInputInitial) {
+    cameraInputInitial.addEventListener('change', handleCameraSelect);
+}
+
+function handleCameraSelect(e) {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
-        // Upload the file first
         uploadFiles(files);
-        // Set tool to scan_to_pdf
+        // After upload, automatically set tool to scan_to_pdf
         selectedTool = 'scan_to_pdf';
-        // Give it a moment to upload, then trigger processing
-        // We'll use a more robust way to wait for upload success
+        // Give a small delay for upload to finish before processing
+        setTimeout(() => {
+            if (uploadedFiles.length > 0) {
+                processFiles();
+            }
+        }, 1000);
     }
-});
+}
 
 function handleFileSelect(event) {
     const files = Array.from(event.target.files);
@@ -578,17 +591,29 @@ function clearFiles() {
     if (fileInput) {
         fileInput.value = '';
     }
+    const cameraInput = document.getElementById('cameraInput');
+    if (cameraInput) {
+        cameraInput.value = '';
+    }
     
     const uploadArea = document.getElementById('uploadArea');
-        uploadArea.innerHTML = `
-        <i class="fas fa-cloud-upload-alt mb-3" style="font-size: 3rem; color: #6c757d;"></i>
-        <h5>Drag & Drop PDF Files</h5>
-        <p class="text-muted">or <button class="btn btn-outline-primary" onclick="document.getElementById('fileInput').click()">Browse Files</button></p>
-        <input type="file" id="fileInput" multiple accept=".pdf" style="display: none;">
+    uploadArea.innerHTML = `
+        <div class="mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-circle p-4 mb-3">
+                <i class="fas fa-cloud-upload-alt text-primary" style="font-size: 3.5rem;"></i>
+            </div>
+        </div>
+        <h2 class="fw-bold mb-3">Ready to process?</h2>
+        <p class="text-muted fs-5 mb-4">Drag & drop your files here or use the button below</p>
+        <button class="btn btn-primary btn-lg px-5 shadow-sm mb-4" onclick="document.getElementById('fileInput').click()">
+            <i class="fas fa-plus me-2"></i>Choose Files
+        </button>
+        <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.docx,.pptx,.xlsx,.html" style="display: none;">
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
         <div class="mt-3">
             <small class="text-muted">
                 {% if current_user.is_premium %}
-                    <i class="fas fa-bolt text-warning"></i> SnapPDF Pro: Unlimited files & priority queue
+                    <i class="fas fa-bolt text-warning"></i> SnapPDF Pro: 100MB limits & priority queue
                 {% else %}
                     <i class="fas fa-info-circle"></i> Free: 5MB per file | Max 3 files per batch
                 {% endif %}
@@ -602,12 +627,31 @@ function clearFiles() {
         if (newFileInput) {
             newFileInput.addEventListener('change', handleFileSelect);
         }
+        const newCameraInput = document.getElementById('cameraInput');
+        if (newCameraInput) {
+            newCameraInput.addEventListener('change', handleCameraSelect);
+        }
         
         // Re-attach drag and drop listeners
         setupDragAndDrop();
     }, 0);
     
     showMessage('Files cleared successfully', 'info');
+}
+
+function handleCameraSelect(e) {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+        uploadFiles(files);
+        // After upload, automatically set tool to scan_to_pdf
+        selectedTool = 'scan_to_pdf';
+        // Give a small delay for upload to finish before processing
+        setTimeout(() => {
+            if (uploadedFiles.length > 0) {
+                processFiles();
+            }
+        }, 1000);
+    }
 }
 
 function selectTool(tool, settings = {}) {

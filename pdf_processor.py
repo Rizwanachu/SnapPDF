@@ -582,7 +582,8 @@ class PDFProcessor:
         return output_files
 
     def scan_to_pdf(self):
-        """Convert images (simulating scan) to PDF"""
+        """Convert images (simulating scan) to PDF with OCR"""
+        # Ensure we use convert_to_pdf logic
         return self.convert_to_pdf()
 
     def organize_pdf_pages(self):
