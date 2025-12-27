@@ -613,33 +613,6 @@ class PDFProcessor:
     def redact_pdf(self):
         """Placeholder for text redaction logic"""
         return []
-                import fitz
-                doc = fitz.open(file_path)
-                base_name = os.path.splitext(os.path.basename(file_path))[0]
-                
-                extracted_images = []
-                for i in range(len(doc)):
-                    for img in doc.get_page_images(i):
-                        xref = img[0]
-                        base_image = doc.extract_image(xref)
-                        image_bytes = base_image["image"]
-                        image_ext = base_image["ext"]
-                        image_filename = generate_unique_filename(f"{base_name}_p{i+1}_img.{image_ext}")
-                        image_path = os.path.join("processed", image_filename)
-                        
-                        with open(image_path, "wb") as f:
-                            f.write(image_bytes)
-                        extracted_images.append(image_path)
-                
-                doc.close()
-                output_files.extend(extracted_images)
-                
-                progress = int((file_idx + 1) / len(input_files) * 100)
-                self.update_progress(progress, file_idx + 1)
-            except Exception as e:
-                logger.error(f"Error extracting images from {file_path}: {str(e)}")
-                continue
-        return output_files
 
 def create_zip_archive(file_paths, zip_filename):
     """Create a ZIP archive from multiple files"""
