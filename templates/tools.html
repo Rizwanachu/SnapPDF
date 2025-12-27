@@ -6,13 +6,13 @@
 <div class="container py-4">
     <div class="row mb-5">
         <div class="col-lg-8 mx-auto text-center">
-            <h1 class="display-4 fw-bold mb-3">SnapPDF Tools</h1>
-            <p class="lead text-muted">Professional-grade PDF tools. Fast, secure, and entirely in your browser.</p>
+            <h1 class="display-4 fw-bold mb-3 text-dark">SnapPDF Tools</h1>
+            <p class="lead text-secondary">Professional-grade PDF tools. Fast, secure, and entirely in your browser.</p>
             {% if not current_user.is_premium %}
-            <div class="card bg-light border-0 shadow-sm d-inline-block p-2">
+            <div class="card bg-white border shadow-sm d-inline-block p-2">
                 <div class="card-body py-2 px-3">
                     <i class="fas fa-bolt text-warning me-2"></i> 
-                    <span class="small fw-bold">Free Plan:</span> <span class="small text-muted">5MB limit per file.</span> 
+                    <span class="small fw-bold text-dark">Free Plan:</span> <span class="small text-secondary">5MB limit per file.</span> 
                     <a href="{{ url_for('premium') }}" class="small fw-bold text-primary ms-2 text-decoration-none">Go Pro for unlimited size →</a>
                 </div>
             </div>
