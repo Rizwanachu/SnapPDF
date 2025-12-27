@@ -19,9 +19,10 @@ logger = logging.getLogger(__name__)
 # Register the authentication blueprint
 # Configure Flask-Login
 from flask_login import LoginManager
+from typing import Optional
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'login'
+login_manager.login_view: Optional[str] = 'login'
 login_manager.login_message = 'Please log in to access this page.'
 
 @login_manager.user_loader
@@ -51,12 +52,11 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         # Create new user
-        user = User(
-            id=str(uuid.uuid4()),
-            email=form.email.data,
-            first_name=form.first_name.data,
-            last_name=form.last_name.data
-        )
+        user = User()
+        user.id = str(uuid.uuid4())
+        user.email = form.email.data
+        user.first_name = form.first_name.data
+        user.last_name = form.last_name.data
         user.set_password(form.password.data)
         
         db.session.add(user)
@@ -349,7 +349,7 @@ def preview_file(file_id):
         if pdf_document.page_count > 0:
             page = pdf_document[0]
             # Convert to image with reasonable quality
-            pix = page.get_pixmap(matrix=fitz.Matrix(1.5, 1.5))
+            pix = page.get_pixmap(matrix=fitz.Matrix(1.5, 1.5))  # type: ignore
             img_data = pix.tobytes("png")
             pdf_document.close()
             
@@ -387,7 +387,7 @@ def file_info(file_id):
                 reader = PdfReader(file)
                 file_info.update({
                     'pages': len(reader.pages),
-                    'metadata': reader.metadata._get_object() if reader.metadata else {},
+                    'metadata': reader.metadata._get_object() if reader.metadata else {},  # type: ignore
                     'encrypted': reader.is_encrypted
                 })
         except Exception as e:
@@ -462,7 +462,7 @@ def preview_processed_file(job_id, filename):
         
         doc = fitz.open(file_path)
         page = doc[0]  # First page
-        pix = page.get_pixmap(matrix=fitz.Matrix(1.2, 1.2))  # 1.2x zoom
+        pix = page.get_pixmap(matrix=fitz.Matrix(1.2, 1.2))  # type: ignore  # 1.2x zoom
         img_data = pix.tobytes("png")
         doc.close()
         
@@ -526,14 +526,13 @@ def create_premium_subscription():
             return redirect(url_for('premium'))
 
         # Create subscription record
-        subscription = Subscription(
-            id=str(uuid.uuid4()),
-            user_id=current_user.id,
-            paypal_subscription_id="verified_" + str(uuid.uuid4())[:8],
-            status=SubscriptionStatus.ACTIVE,
-            activated_at=datetime.now(),
-            expires_at=datetime.now() + timedelta(days=30)
-        )
+        subscription = Subscription()
+        subscription.id = str(uuid.uuid4())
+        subscription.user_id = current_user.id
+        subscription.paypal_subscription_id = "verified_" + str(uuid.uuid4())[:8]
+        subscription.status = SubscriptionStatus.ACTIVE
+        subscription.activated_at = datetime.now()
+        subscription.expires_at = datetime.now() + timedelta(days=30)
         
         db.session.add(subscription)
         

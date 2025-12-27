@@ -66,14 +66,16 @@ class User(UserMixin, db.Model):
         if self.is_premium:
             return True
         
-        for subscription in self.subscriptions:
+        subs = db.session.query(Subscription).filter_by(user_id=self.id).all()
+        for subscription in subs:
             if subscription.is_active():
                 return True
         return False
     
     def get_active_subscription(self):
         """Get the user's active subscription if any"""
-        for subscription in self.subscriptions:
+        subs = db.session.query(Subscription).filter_by(user_id=self.id).all()
+        for subscription in subs:
             if subscription.is_active():
                 return subscription
         return None

@@ -1,0 +1,81 @@
+You are a senior SaaS product designer, conversion-focused UX writer, and full-stack deployment expert.
+
+I am building a Flask-based Online PDF Tools web application similar to iLovePDF with features like merge, split, compress, OCR, convert (Word/Excel), watermark, protect/unlock, rotate, and extract images.
+
+The app already works technically. Your task is to refine positioning, increase conversions, add trust signals, and prepare it for production deployment — WITHOUT changing the core tech stack or adding paid services.
+
+–––––––––––––––––
+GOALS
+–––––––––––––––––
+1) Refine homepage positioning so users instantly understand:
+   - What the app does
+   - Who it’s for
+   - Why they should trust it
+   - Why it’s better/simpler than alternatives
+
+2) Improve free → premium conversion naturally (no dark patterns)
+
+3) Add viral and trust signals using ONLY UI, copy, and logic (no new backend services)
+
+4) Prepare the app for clean deployment on Vercel or Netlify
+
+–––––––––––––––––
+DELIVERABLES
+–––––––––––––––––
+
+A) HOMEPAGE POSITIONING
+- Write a strong hero section:
+  - Headline (clear, benefit-driven)
+  - Subheadline (who it’s for + speed/privacy)
+  - Primary CTA (free-first)
+  - Secondary CTA (premium hint, not pushy)
+- Feature section copy rewritten to sound simple, human, and outcome-focused
+- One short “Why this tool exists” paragraph for trust
+
+B) FREE → PREMIUM CONVERSION STRATEGY
+- Define exactly:
+  - What free users get (current limits respected)
+  - What premium unlocks (speed, bulk, no limits, priority)
+- Suggest where to place:
+  - Upgrade nudges (after job completion, file limit reached, queue wait)
+  - Soft copy for upgrade buttons (non-salesy)
+- Write:
+  - Pricing page headline + description
+  - One persuasive but honest premium value paragraph
+
+C) VIRAL + TRUST SIGNALS (NO TECH CHANGES)
+- Add UI copy ideas such as:
+  - “X PDFs processed today”
+  - “Saved Y MB of storage this week”
+  - “Used by students, freelancers, and teams”
+- Add micro-copy for:
+  - Privacy reassurance (files deleted, not stored)
+  - Security reassurance
+- Suggest 3 shareable moments:
+  - After compression
+  - After conversion
+  - After merge
+- Provide exact example share text users can copy
+
+D) DEPLOYMENT PREP (VERCEL / NETLIFY)
+- Explain:
+  - Whether this app should be deployed on Vercel or Netlify and why
+  - Required changes (if any) for Flask compatibility
+  - Environment variable handling
+  - File upload considerations
+- Give a clean deployment checklist:
+  - Build settings
+  - Runtime
+  - Routing
+  - Production safety tips
+
+–––––––––––––––––
+CONSTRAINTS
+–––––––––––––––––
+- Do NOT suggest paid third-party services
+- Do NOT rewrite backend logic
+- Do NOT add new features
+- Focus on copy, UX, positioning, and deployment clarity
+- Output should be structured, practical, and ready to implement
+
+Respond with clear sections, bullet points, and ready-to-use copy.
