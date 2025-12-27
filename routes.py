@@ -576,3 +576,162 @@ def cancel_subscription():
         flash('Error cancelling subscription. Please contact support.', 'error')
     
     return redirect(url_for('premium'))
+
+# Tool routes
+TOOL_CONFIGS = {
+    'merge': {'title': 'Merge PDF', 'category': 'Organize', 'job_type': 'merge', 'multiple': True},
+    'split': {'title': 'Split PDF', 'category': 'Organize', 'job_type': 'split', 'multiple': False},
+    'compress': {'title': 'Compress PDF', 'category': 'Optimize', 'job_type': 'compress', 'multiple': True},
+    'repair': {'title': 'Repair PDF', 'category': 'Optimize', 'job_type': 'repair', 'multiple': True},
+    'ocr': {'title': 'OCR PDF', 'category': 'Optimize', 'job_type': 'ocr', 'multiple': True},
+    'jpg-to-pdf': {'title': 'JPG to PDF', 'category': 'Convert to PDF', 'job_type': 'jpg_to_pdf', 'multiple': True},
+    'word-to-pdf': {'title': 'Word to PDF', 'category': 'Convert to PDF', 'job_type': 'word_to_pdf', 'multiple': True},
+    'powerpoint-to-pdf': {'title': 'PowerPoint to PDF', 'category': 'Convert to PDF', 'job_type': 'powerpoint_to_pdf', 'multiple': True},
+    'excel-to-pdf': {'title': 'Excel to PDF', 'category': 'Convert to PDF', 'job_type': 'excel_to_pdf', 'multiple': True},
+    'html-to-pdf': {'title': 'HTML to PDF', 'category': 'Convert to PDF', 'job_type': 'html_to_pdf', 'multiple': True},
+    'pdf-to-jpg': {'title': 'PDF to JPG', 'category': 'Convert from PDF', 'job_type': 'pdf_to_jpg', 'multiple': True},
+    'pdf-to-word': {'title': 'PDF to Word', 'category': 'Convert from PDF', 'job_type': 'convert_word', 'multiple': True},
+    'pdf-to-powerpoint': {'title': 'PDF to PowerPoint', 'category': 'Convert from PDF', 'job_type': 'pdf_to_powerpoint', 'multiple': True},
+    'pdf-to-excel': {'title': 'PDF to Excel', 'category': 'Convert from PDF', 'job_type': 'pdf_to_excel', 'multiple': True},
+    'pdf-to-pdfa': {'title': 'PDF to PDF/A', 'category': 'Convert from PDF', 'job_type': 'pdf_to_pdfa', 'multiple': True},
+    'rotate': {'title': 'Rotate PDF', 'category': 'Edit', 'job_type': 'rotate', 'multiple': True},
+    'add-page-numbers': {'title': 'Add Page Numbers', 'category': 'Edit', 'job_type': 'add_page_numbers', 'multiple': True},
+    'add-watermark': {'title': 'Add Watermark', 'category': 'Edit', 'job_type': 'watermark', 'multiple': True},
+    'crop': {'title': 'Crop PDF', 'category': 'Edit', 'job_type': 'crop', 'multiple': True},
+    'edit': {'title': 'Edit PDF', 'category': 'Edit', 'job_type': 'edit', 'multiple': True},
+    'unlock': {'title': 'Unlock PDF', 'category': 'Security', 'job_type': 'unlock', 'multiple': True},
+    'protect': {'title': 'Protect PDF', 'category': 'Security', 'job_type': 'protect', 'multiple': True},
+    'sign': {'title': 'Sign PDF', 'category': 'Security', 'job_type': 'sign', 'multiple': True},
+    'redact': {'title': 'Redact PDF', 'category': 'Security', 'job_type': 'redact', 'multiple': True},
+    'compare': {'title': 'Compare PDF', 'category': 'Security', 'job_type': 'compare', 'multiple': True},
+    'extract-images': {'title': 'Extract Images', 'category': 'Organize', 'job_type': 'extract_images', 'multiple': True},
+    'remove-pages': {'title': 'Remove Pages', 'category': 'Organize', 'job_type': 'remove_pages', 'multiple': False},
+    'extract-pages': {'title': 'Extract Pages', 'category': 'Organize', 'job_type': 'extract_pages', 'multiple': False},
+    'organize': {'title': 'Organize PDF', 'category': 'Organize', 'job_type': 'organize', 'multiple': False},
+}
+
+@app.route('/tool/<tool_id>', methods=['GET', 'POST'])
+@login_required
+def tool_page(tool_id):
+    """Generic tool page for all PDF operations"""
+    if tool_id not in TOOL_CONFIGS:
+        flash('Tool not found', 'error')
+        return redirect(url_for('tools'))
+    
+    config = TOOL_CONFIGS[tool_id]
+    
+    if request.method == 'POST':
+        # Get uploaded files from form
+        if 'files' not in request.files:
+            flash('No files uploaded', 'error')
+            return redirect(url_for('tool_page', tool_id=tool_id))
+        
+        files = request.files.getlist('files')
+        if not files or all(f.filename == '' for f in files):
+            flash('No files selected', 'error')
+            return redirect(url_for('tool_page', tool_id=tool_id))
+        
+        try:
+            # Save uploaded files
+            uploaded_file_ids = []
+            for file in files:
+                if file and file.filename:
+                    file_id = str(uuid.uuid4())
+                    stored_filename = generate_unique_filename(file.filename)
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], stored_filename)
+                    file.save(file_path)
+                    
+                    file_upload = FileUpload()
+                    file_upload.id = file_id
+                    file_upload.user_id = current_user.id
+                    file_upload.original_filename = file.filename
+                    file_upload.stored_filename = stored_filename
+                    file_upload.file_size = os.path.getsize(file_path)
+                    file_upload.file_path = file_path
+                    
+                    db.session.add(file_upload)
+                    uploaded_file_ids.append(file_id)
+            
+            db.session.commit()
+            
+            if not uploaded_file_ids:
+                flash('No files uploaded', 'error')
+                return redirect(url_for('tool_page', tool_id=tool_id))
+            
+            # Prepare settings based on tool
+            settings = {}
+            
+            if tool_id == 'compress':
+                settings['compression_quality'] = request.form.get('compression_quality', 'medium')
+            elif tool_id == 'rotate':
+                settings['rotation'] = request.form.get('rotation', '90')
+            elif tool_id == 'add-watermark':
+                settings['watermark_text'] = request.form.get('watermark_text', 'CONFIDENTIAL')
+            elif tool_id == 'crop':
+                settings['crop_box'] = [0.1, 0.1, 0.9, 0.9]
+            elif tool_id == 'protect':
+                settings['password'] = request.form.get('password', '')
+            elif tool_id == 'unlock':
+                settings['password'] = request.form.get('password', '')
+            elif tool_id == 'sign':
+                settings['signature_text'] = request.form.get('signature_text', 'Signed')
+            elif tool_id == 'redact':
+                keywords_str = request.form.get('keywords', '')
+                settings['keywords'] = [k.strip() for k in keywords_str.split(',') if k.strip()]
+            elif tool_id in ['remove-pages', 'extract-pages', 'organize']:
+                pages_str = request.form.get('pages', '')
+                try:
+                    settings['pages'] = [int(p.strip()) for p in pages_str.split(',') if p.strip()]
+                except ValueError:
+                    flash('Invalid page numbers', 'error')
+                    return redirect(url_for('tool_page', tool_id=tool_id))
+            elif tool_id == 'ocr':
+                settings['ocr_language'] = request.form.get('ocr_language', 'eng')
+                settings['output_format'] = request.form.get('output_format', 'txt')
+            
+            # Create processing job
+            job_id = str(uuid.uuid4())
+            file_uploads = FileUpload.query.filter(FileUpload.id.in_(uploaded_file_ids)).all()
+            input_files = [fu.file_path for fu in file_uploads]
+            
+            job = ProcessingJob()
+            job.id = job_id
+            job.user_id = current_user.id
+            job.job_type = JobType(config['job_type'])
+            job.input_files = json.dumps(input_files)
+            job.total_files = len(input_files)
+            job.settings = json.dumps(settings)
+            
+            db.session.add(job)
+            db.session.commit()
+            
+            # Add to queue
+            queue_manager = get_queue_manager()
+            queue_manager.add_job(job_id)
+            
+            flash(f'{config["title"]} job started!', 'success')
+            return redirect(url_for('job_status', job_id=job_id))
+            
+        except Exception as e:
+            logger.error(f"Error in tool_page: {str(e)}")
+            flash('Error processing request', 'error')
+            return redirect(url_for('tool_page', tool_id=tool_id))
+    
+    return render_template('tool.html', tool_id=tool_id, config=config)
+
+@app.route('/all-tools')
+@login_required
+def all_tools():
+    """Display all available tools"""
+    tools_by_category = {}
+    for tool_id, config in TOOL_CONFIGS.items():
+        category = config['category']
+        if category not in tools_by_category:
+            tools_by_category[category] = []
+        tools_by_category[category].append({
+            'id': tool_id,
+            'title': config['title'],
+            'url': url_for('tool_page', tool_id=tool_id)
+        })
+    
+    return render_template('all-tools.html', tools_by_category=tools_by_category)
