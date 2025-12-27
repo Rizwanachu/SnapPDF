@@ -73,12 +73,15 @@ def format_file_size(size_bytes):
     return f"{size_bytes:.1f} {size_names[i]}"
 
 def validate_pdf_file(file):
-    """Validate that uploaded file is a valid PDF"""
+    """Validate that uploaded file is a supported format"""
     if not file or not file.filename:
         return False, "No file selected"
     
-    if not file.filename.lower().endswith('.pdf'):
-        return False, "Only PDF files are allowed"
+    allowed_extensions = {'.pdf', '.jpg', '.jpeg', '.png', '.docx', '.pptx', '.xlsx', '.html'}
+    ext = os.path.splitext(file.filename)[1].lower()
+    
+    if ext not in allowed_extensions:
+        return False, f"Unsupported file format: {ext}"
     
     # Check file size
     file.seek(0, 2)  # Seek to end
@@ -88,7 +91,7 @@ def validate_pdf_file(file):
     if file_size == 0:
         return False, "File is empty"
     
-    return True, "Valid PDF file"
+    return True, "Valid file format"
 
 def get_user_display_name(user):
     """Get a display name for a user"""

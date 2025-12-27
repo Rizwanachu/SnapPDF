@@ -36,7 +36,7 @@
                         <button class="btn btn-primary btn-lg px-5 shadow-sm mb-4" onclick="document.getElementById('fileInput').click()">
                             <i class="fas fa-plus me-2"></i>Choose Files
                         </button>
-                        <input type="file" id="fileInput" multiple accept=".pdf" style="display: none;">
+                        <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.docx,.pptx,.xlsx,.html" style="display: none;">
                         <div class="mt-3">
                             <small class="text-muted">
                                 {% if current_user.is_premium %}
@@ -463,10 +463,14 @@ function handleFileSelect(event) {
         const isPremium = {{ 'true' if current_user.is_premium else 'false' }};
         const fileLimit = isPremium ? 100 * 1024 * 1024 : 5 * 1024 * 1024;
         const batchLimit = isPremium ? 100 : 3;
+        const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.docx', '.pptx', '.xlsx', '.html'];
         
         files.forEach(file => {
-            if (file.type !== 'application/pdf') {
-                errors.push(`${file.name} is not a PDF file`);
+            const fileName = file.name.toLowerCase();
+            const hasValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+            
+            if (!hasValidExtension) {
+                errors.push(`${file.name} is not a supported file format`);
                 return;
             }
             
