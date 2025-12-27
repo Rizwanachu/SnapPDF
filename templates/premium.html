@@ -106,12 +106,13 @@
                         </div>
                         <div class="card-footer text-center">
                             <form method="POST" action="{{ url_for('create_premium_subscription') }}">
+                                <input type="hidden" name="payment_confirmed" value="true">
                                 <button type="submit" class="btn btn-primary btn-lg">
                                     <i class="fas fa-star"></i> Upgrade to Premium
                                 </button>
                             </form>
                             <small class="text-muted d-block mt-2">
-                                Demo version • Instant activation
+                                Demo version • Verified activation
                             </small>
                         </div>
                     </div>

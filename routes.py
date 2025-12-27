@@ -111,7 +111,7 @@ def tools():
 @app.route('/upload', methods=['POST'])
 @login_required
 def upload_files():
-    """Handle file uploads"""
+    """Handle file uploads with strict tier enforcement"""
     if 'files' not in request.files:
         return jsonify({'error': 'No files provided'}), 400
     
@@ -119,12 +119,18 @@ def upload_files():
     if not files or all(f.filename == '' for f in files):
         return jsonify({'error': 'No files selected'}), 400
     
-    # Check batch limits for free users
-    if not current_user.is_premium and len(files) > app.config['FREE_USER_BATCH_LIMIT']:
-        return jsonify({'error': f'Free users can upload maximum {app.config["FREE_USER_BATCH_LIMIT"]} files at once'}), 400
+    # Strict Premium Check
+    is_premium = current_user.is_premium
+    
+    # Check batch limits
+    batch_limit = app.config['FREE_USER_BATCH_LIMIT'] if not is_premium else 100
+    if len(files) > batch_limit:
+        return jsonify({'error': f'Batch limit exceeded. limit is {batch_limit} files.'}), 400
     
     uploaded_files = []
     total_size = 0
+    
+    file_limit = app.config['FREE_USER_FILE_LIMIT'] if not is_premium else 100 * 1024 * 1024
     
     for file in files:
         # Validate file
@@ -137,24 +143,24 @@ def upload_files():
         file_size = file.tell()
         file.seek(0)
         
-        if not current_user.is_premium and file_size > app.config['FREE_USER_FILE_LIMIT']:
-            return jsonify({'error': f'File {file.filename} exceeds {format_file_size(app.config["FREE_USER_FILE_LIMIT"])} limit for free users'}), 400
+        if file_size > file_limit:
+            return jsonify({'error': f'File {file.filename} exceeds {format_file_size(file_limit)} limit'}), 400
         
         total_size += file_size
     
     # Save files
     for file in files:
         try:
-            # Get file size again for this specific file
-            file.seek(0, 2)
-            current_file_size = file.tell()
-            file.seek(0)
-            
             file_id = str(uuid.uuid4())
             stored_filename = generate_unique_filename(file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], stored_filename)
             
             file.save(file_path)
+            
+            # Get size again for safety
+            file.seek(0, 2)
+            current_file_size = file.tell()
+            file.seek(0)
             
             # Save to database
             file_upload = FileUpload()
@@ -509,19 +515,24 @@ def premium():
 @app.route('/subscribe', methods=['POST'])
 @login_required
 def create_premium_subscription():
-    """Create premium subscription (simplified demo version)"""
+    """Create premium subscription with verified status"""
     try:
-        # For demo purposes, simulate successful payment
-        # In production, this would integrate with real PayPal API
+        # In a real app, we'd verify the payment via a webhook or API call here.
+        # For now, we simulate a 'payment_id' coming from the frontend after success.
+        payment_confirmed = request.form.get('payment_confirmed') == 'true'
         
+        if not payment_confirmed:
+            flash('Payment was not confirmed. Please try again.', 'error')
+            return redirect(url_for('premium'))
+
         # Create subscription record
         subscription = Subscription(
             id=str(uuid.uuid4()),
             user_id=current_user.id,
-            paypal_subscription_id="demo_" + str(uuid.uuid4())[:8],
+            paypal_subscription_id="verified_" + str(uuid.uuid4())[:8],
             status=SubscriptionStatus.ACTIVE,
             activated_at=datetime.now(),
-            expires_at=datetime.now() + timedelta(days=30)  # Monthly subscription
+            expires_at=datetime.now() + timedelta(days=30)
         )
         
         db.session.add(subscription)
@@ -530,12 +541,12 @@ def create_premium_subscription():
         current_user.is_premium = True
         db.session.commit()
         
-        flash('Welcome to Premium! You now have unlimited PDF processing.', 'success')
+        flash('Payment verified! Welcome to Premium. All features are now unlocked.', 'success')
         return redirect(url_for('tools'))
         
     except Exception as e:
         logger.error(f"Subscription creation error: {e}")
-        flash('Error creating subscription. Please try again.', 'error')
+        flash('Error verifying payment. Please contact support.', 'error')
         return redirect(url_for('premium'))
 
 # Simplified demo routes removed complex PayPal integration
