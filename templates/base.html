@@ -14,8 +14,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                <img src="{{ url_for('static', filename='logo.png') }}" alt="SnapPDF" height="40" class="me-2">
-                <span style="font-weight: 700; font-size: 1.3rem;">SnapPDF</span>
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="SnapPDF" height="70" style="max-width: 200px;">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -80,7 +79,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5>SnapPDF</h5>
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="SnapPDF" height="80" style="max-width: 250px; margin-bottom: 1rem;">
                     <p class="text-muted">Powerful PDF processing tools for all your document needs.</p>
                 </div>
                 <div class="col-md-6">
@@ -94,7 +93,7 @@
             </div>
             <hr>
             <div class="text-center">
-                <p class="text-muted mb-0">&copy; 2025 SnapPDF. All rights reserved.</p>
+                <p class="text-muted mb-0">&copy; 2025. All rights reserved.</p>
             </div>
         </div>
     </footer>
