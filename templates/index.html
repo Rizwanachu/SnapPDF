@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}PDF Tools - Professional PDF Processing{% endblock %}
+{% block title %}SnapPDF - Professional PDF Processing{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
@@ -18,12 +18,7 @@
             </div>
             <div class="col-lg-6 d-none d-lg-block">
                 <div class="text-center">
-                    <div class="position-relative d-inline-block">
-                        <i class="fas fa-file-pdf text-white" style="font-size: 240px; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3));"></i>
-                        <div class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning p-3 shadow-lg">
-                            <i class="fas fa-crown fa-2x"></i>
-                        </div>
-                    </div>
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="SnapPDF" style="max-width: 100%; height: auto; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3));">
                 </div>
             </div>
         </div>

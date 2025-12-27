@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}PDF Tools{% endblock %}</title>
+    <title>{% block title %}SnapPDF - PDF Tools{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -14,7 +14,8 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-file-pdf text-danger me-2"></i>PDF Tools
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="SnapPDF" height="40" class="me-2">
+                <span style="font-weight: 700; font-size: 1.3rem;">SnapPDF</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -79,8 +80,8 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5>PDF Tools</h5>
-                    <p class="text-muted">Professional PDF processing tools for all your document needs.</p>
+                    <h5>SnapPDF</h5>
+                    <p class="text-muted">Powerful PDF processing tools for all your document needs.</p>
                 </div>
                 <div class="col-md-6">
                     <h6>Links</h6>
@@ -93,7 +94,7 @@
             </div>
             <hr>
             <div class="text-center">
-                <p class="text-muted mb-0">&copy; 2025 PDF Tools. All rights reserved.</p>
+                <p class="text-muted mb-0">&copy; 2025 SnapPDF. All rights reserved.</p>
             </div>
         </div>
     </footer>
