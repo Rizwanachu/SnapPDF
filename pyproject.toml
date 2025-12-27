@@ -27,4 +27,5 @@ dependencies = [
     "requests>=2.32.4",
     "paypalrestsdk>=1.13.3",
     "psycopg2-binary>=2.9.11",
+    "python-pptx>=1.0.2",
 ]

@@ -776,18 +776,18 @@ class PDFProcessor:
         return output_files
 
     def convert_from_pdf(self):
-        """Convert PDF to other formats (images, documents)"""
+        """Convert PDF to other formats (images, documents, slides, sheets)"""
         input_files = json.loads(self.job.input_files)
         output_files = []
         
         for file_idx, file_path in enumerate(input_files):
             try:
+                import fitz
+                doc = fitz.open(file_path)
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 
                 if self.job.job_type == JobType.PDF_TO_JPG:
                     # PDF to JPG - convert each page to image
-                    import fitz
-                    doc = fitz.open(file_path)
                     for page_num in range(len(doc)):
                         page = doc[page_num]
                         pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
@@ -795,47 +795,62 @@ class PDFProcessor:
                         output_path = os.path.join("processed", output_filename)
                         pix.save(output_path)
                         output_files.append(output_path)
-                    doc.close()
                 
                 elif self.job.job_type == JobType.PDF_TO_POWERPOINT:
-                    # PDF to PowerPoint - basic conversion
+                    # PDF to PowerPoint - convert each page to a slide image
+                    from pptx import Presentation
+                    from pptx.util import Inches
+                    prs = Presentation()
+                    # Set slide size to match common PDF aspect ratio or standard 4:3
+                    prs.slide_width = Inches(10)
+                    prs.slide_height = Inches(7.5)
+                    
+                    for page_num in range(len(doc)):
+                        page = doc[page_num]
+                        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+                        img_filename = generate_unique_filename(f"temp_slide_{page_num}.png")
+                        img_path = os.path.join("temp", img_filename)
+                        pix.save(img_path)
+                        
+                        slide = prs.slides.add_slide(prs.slide_layouts[6]) # blank slide
+                        slide.shapes.add_picture(img_path, 0, 0, width=prs.slide_width, height=prs.slide_height)
+                        if os.path.exists(img_path):
+                            os.remove(img_path)
+                            
                     output_filename = generate_unique_filename(f"{base_name}.pptx")
                     output_path = os.path.join("processed", output_filename)
-                    # Basic PowerPoint creation
-                    try:
-                        from pptx import Presentation
-                        prs = Presentation()
-                        prs.slide_width = 9144000
-                        prs.slide_height = 6858000
-                        blank_slide_layout = prs.slide_layouts[6]
-                        slide = prs.slides.add_slide(blank_slide_layout)
-                        prs.save(output_path)
-                        output_files.append(output_path)
-                    except:
-                        logger.warning("Could not create PowerPoint file")
+                    prs.save(output_path)
+                    output_files.append(output_path)
                 
                 elif self.job.job_type == JobType.PDF_TO_EXCEL:
-                    # PDF to Excel - basic conversion
-                    output_filename = generate_unique_filename(f"{base_name}.xlsx")
-                    output_path = os.path.join("processed", output_filename)
+                    # PDF to Excel - extract text content
+                    import openpyxl
                     wb = openpyxl.Workbook()
                     ws = wb.active
-                    ws['A1'] = f"PDF Content: {base_name}"
+                    ws.title = "Extracted Text"
+                    
+                    row = 1
+                    for page_num in range(len(doc)):
+                        page = doc[page_num]
+                        text = page.get_text()
+                        for line in text.split('\n'):
+                            if line.strip():
+                                ws.cell(row=row, column=1, value=line.strip())
+                                row += 1
+                                
+                    output_filename = generate_unique_filename(f"{base_name}.xlsx")
+                    output_path = os.path.join("processed", output_filename)
                     wb.save(output_path)
                     output_files.append(output_path)
                 
                 elif self.job.job_type == JobType.PDF_TO_PDFA:
-                    # PDF to PDF/A - archive format
-                    reader = PdfReader(file_path)
-                    writer = PdfWriter()
-                    for page in reader.pages:
-                        writer.add_page(page)
+                    # PDF to PDF/A - Simplified archive format
                     output_filename = generate_unique_filename(f"{base_name}_pdfa.pdf")
                     output_path = os.path.join("processed", output_filename)
-                    with open(output_path, 'wb') as f:
-                        writer.write(f)
+                    doc.save(output_path, garbage=4, deflate=True, clean=True)
                     output_files.append(output_path)
                 
+                doc.close()
                 progress = int((file_idx + 1) / len(input_files) * 100)
                 self.update_progress(progress, file_idx + 1)
                 
