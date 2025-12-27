@@ -545,6 +545,40 @@ class PDFProcessor:
                 continue
         return output_files
 
+    def extract_images_pdfs(self):
+        """Extract images from PDF files"""
+        input_files = json.loads(self.job.input_files)
+        output_files = []
+        for file_idx, file_path in enumerate(input_files):
+            try:
+                import fitz
+                doc = fitz.open(file_path)
+                base_name = os.path.splitext(os.path.basename(file_path))[0]
+                
+                for page_num in range(len(doc)):
+                    page = doc[page_num]
+                    image_list = page.get_images()
+                    for img_idx, img in enumerate(image_list):
+                        xref = img[0]
+                        base_image = doc.extract_image(xref)
+                        image_bytes = base_image["image"]
+                        image_ext = base_image["ext"]
+                        
+                        output_filename = generate_unique_filename(f"{base_name}_p{page_num+1}_img{img_idx+1}.{image_ext}")
+                        output_path = os.path.join("processed", output_filename)
+                        
+                        with open(output_path, "wb") as f:
+                            f.write(image_bytes)
+                        output_files.append(output_path)
+                
+                doc.close()
+                progress = int((file_idx + 1) / len(input_files) * 100)
+                self.update_progress(progress, file_idx + 1)
+            except Exception as e:
+                logger.error(f"Error extracting images from {file_path}: {str(e)}")
+                continue
+        return output_files
+
     def organize_pdf_pages(self):
         """Handle removing, extracting, or reordering pages"""
         input_files = json.loads(self.job.input_files)
@@ -595,6 +629,31 @@ class PDFProcessor:
                 output_files.append(output_path)
             except Exception as e:
                 logger.error(f"Repair failed: {e}")
+        return output_files
+
+    def convert_to_excel(self):
+        """Convert PDF to Excel"""
+        input_files = json.loads(self.job.input_files)
+        output_files = []
+        for file_idx, file_path in enumerate(input_files):
+            try:
+                wb = openpyxl.Workbook()
+                ws = wb.active
+                reader = PdfReader(file_path)
+                for i, page in enumerate(reader.pages):
+                    ws.cell(row=i+1, column=1, value=page.extract_text()[:32000])
+                
+                base_name = os.path.splitext(os.path.basename(file_path))[0]
+                output_filename = generate_unique_filename(f"{base_name}.xlsx")
+                output_path = os.path.join("processed", output_filename)
+                wb.save(output_path)
+                output_files.append(output_path)
+                
+                progress = int((file_idx + 1) / len(input_files) * 100)
+                self.update_progress(progress, file_idx + 1)
+            except Exception as e:
+                logger.error(f"Error converting to excel {file_path}: {str(e)}")
+                continue
         return output_files
 
     def convert_to_pdf(self):
@@ -862,13 +921,16 @@ class PDFProcessor:
         
         return output_files
 
+    def edit_pdf(self):
+        """Placeholder for advanced PDF editing - currently just re-saves"""
+        return self.repair_pdf()
+
     def sign_pdf(self):
-        """Add signature text/image to PDF"""
+        """Sign PDF (add signature text to last page)"""
         input_files = json.loads(self.job.input_files)
         settings = json.loads(self.job.settings) if self.job.settings else {}
-        signature_text = settings.get('signature_text', 'Signed')
+        signature_text = settings.get('signature_text', 'Signed electronically')
         output_files = []
-        
         for file_idx, file_path in enumerate(input_files):
             try:
                 from reportlab.pdfgen import canvas
@@ -877,151 +939,106 @@ class PDFProcessor:
                 
                 reader = PdfReader(file_path)
                 writer = PdfWriter()
+                for page in reader.pages:
+                    writer.add_page(page)
                 
-                # Create signature annotation
+                # Create signature overlay
                 packet = io.BytesIO()
-                can = canvas.Canvas(packet, pagesize=(612, 792))
-                can.setFont("Helvetica", 12)
+                can = canvas.Canvas(packet, pagesize=letter)
+                can.setFont("Helvetica-Bold", 12)
                 can.drawString(50, 50, signature_text)
                 can.save()
                 packet.seek(0)
                 
                 sig_reader = PdfReader(packet)
-                sig_page = sig_reader.pages[0]
-                
-                # Add signature to last page
-                for page_num, page in enumerate(reader.pages):
-                    if page_num == len(reader.pages) - 1:
-                        page.merge_page(sig_page)
-                    writer.add_page(page)
+                writer.pages[-1].merge_page(sig_reader.pages[0])
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}_signed.pdf")
                 output_path = os.path.join("processed", output_filename)
-                
                 with open(output_path, 'wb') as f:
                     writer.write(f)
                 output_files.append(output_path)
                 
-                progress = int((file_idx + 1) / len(input_files) * 100)
-                self.update_progress(progress, file_idx + 1)
+                self.update_progress(int((file_idx + 1) / len(input_files) * 100), file_idx + 1)
             except Exception as e:
-                logger.error(f"Error signing {file_path}: {str(e)}")
-                continue
-        
+                logger.error(f"Signing failed: {e}")
         return output_files
 
     def redact_pdf(self):
-        """Redact sensitive text from PDF"""
+        """Redact text from PDF"""
         input_files = json.loads(self.job.input_files)
         settings = json.loads(self.job.settings) if self.job.settings else {}
         keywords = settings.get('keywords', [])
         output_files = []
-        
         for file_idx, file_path in enumerate(input_files):
             try:
                 import fitz
                 doc = fitz.open(file_path)
-                
-                for page_num in range(len(doc)):
-                    page = doc[page_num]
-                    # Search for keywords and redact them
-                    for keyword in keywords:
-                        text_instances = page.search_for(keyword)
-                        for inst in text_instances:
-                            # Draw black rectangle over the text
-                            page.draw_rect(inst, color=None, fill=(0, 0, 0), overlay=False)
+                for page in doc:
+                    for kw in keywords:
+                        for inst in page.search_for(kw):
+                            page.add_redact_annotation(inst, fill=(0,0,0))
+                    page.apply_redactions()
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}_redacted.pdf")
                 output_path = os.path.join("processed", output_filename)
-                
-                doc.save(output_path, garbage=4, deflate=True)
+                doc.save(output_path)
                 doc.close()
                 output_files.append(output_path)
                 
-                progress = int((file_idx + 1) / len(input_files) * 100)
-                self.update_progress(progress, file_idx + 1)
+                self.update_progress(int((file_idx + 1) / len(input_files) * 100), file_idx + 1)
             except Exception as e:
-                logger.error(f"Error redacting {file_path}: {str(e)}")
-                continue
-        
+                logger.error(f"Redaction failed: {e}")
         return output_files
 
     def compare_pdf(self):
-        """Compare two PDF files"""
+        """Compare two PDFs (basic page count comparison report)"""
         input_files = json.loads(self.job.input_files)
         if len(input_files) < 2:
-            raise ValueError("At least 2 files needed for comparison")
-        
-        try:
-            from reportlab.pdfgen import canvas
-            from reportlab.lib.pagesizes import letter
-            import io
-            
-            # Create comparison report
-            packet = io.BytesIO()
-            can = canvas.Canvas(packet, pagesize=letter)
-            
-            can.setFont("Helvetica-Bold", 16)
-            can.drawString(50, 750, "PDF Comparison Report")
-            can.setFont("Helvetica", 12)
-            
-            y = 720
-            for i, file_path in enumerate(input_files):
-                try:
-                    reader = PdfReader(file_path)
-                    filename = os.path.basename(file_path)
-                    can.drawString(50, y, f"File {i+1}: {filename}")
-                    y -= 20
-                    can.drawString(70, y, f"Pages: {len(reader.pages)}")
-                    y -= 20
-                except:
-                    pass
-            
-            can.save()
-            packet.seek(0)
-            
-            output_filename = generate_unique_filename("comparison_report.pdf")
-            output_path = os.path.join("processed", output_filename)
-            
-            with open(output_path, 'wb') as f:
-                f.write(packet.getvalue())
-            
-            self.update_progress(100, 1)
-            return [output_path]
-        except Exception as e:
-            logger.error(f"Error comparing PDFs: {str(e)}")
             return []
-
-    def edit_pdf(self):
-        """Edit PDF content - generic editing function"""
-        input_files = json.loads(self.job.input_files)
-        settings = json.loads(self.job.settings) if self.job.settings else {}
-        output_files = []
         
+        report_filename = generate_unique_filename("comparison_report.txt")
+        report_path = os.path.join("processed", report_filename)
+        with open(report_path, "w") as f:
+            f.write("PDF Comparison Report\n")
+            f.write("=====================\n\n")
+            for fp in input_files:
+                try:
+                    reader = PdfReader(fp)
+                    f.write(f"File: {os.path.basename(fp)}\n")
+                    f.write(f"Pages: {len(reader.pages)}\n")
+                    f.write(f"Metadata: {reader.metadata}\n\n")
+                except:
+                    f.write(f"Error reading {os.path.basename(fp)}\n\n")
+        
+        self.update_progress(100, len(input_files))
+        return [report_path]
+
+    def convert_to_excel(self):
+        """Convert PDF to Excel"""
+        input_files = json.loads(self.job.input_files)
+        output_files = []
         for file_idx, file_path in enumerate(input_files):
             try:
+                wb = openpyxl.Workbook()
+                ws = wb.active
                 reader = PdfReader(file_path)
-                writer = PdfWriter()
-                
-                for page in reader.pages:
-                    writer.add_page(page)
+                for i, page in enumerate(reader.pages):
+                    ws.cell(row=i+1, column=1, value=page.extract_text()[:32000])
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
-                output_filename = generate_unique_filename(f"{base_name}_edited.pdf")
+                output_filename = generate_unique_filename(f"{base_name}.xlsx")
                 output_path = os.path.join("processed", output_filename)
-                
-                with open(output_path, 'wb') as f:
-                    writer.write(f)
+                wb.save(output_path)
                 output_files.append(output_path)
                 
                 progress = int((file_idx + 1) / len(input_files) * 100)
                 self.update_progress(progress, file_idx + 1)
             except Exception as e:
-                logger.error(f"Error editing {file_path}: {str(e)}")
+                logger.error(f"Error converting to excel {file_path}: {str(e)}")
                 continue
-        
         return output_files
 
 def create_zip_archive(file_paths, zip_filename):
