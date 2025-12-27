@@ -65,6 +65,10 @@ class PDFProcessor:
                 result = self.rotate_pdfs()
             elif self.job.job_type == JobType.WATERMARK:
                 result = self.watermark_pdfs()
+            elif self.job.job_type == JobType.UNLOCK:
+                result = self.unlock_pdfs()
+            elif self.job.job_type == JobType.EXTRACT_IMAGES:
+                result = self.extract_images_pdfs()
             else:
                 raise ValueError(f"Unknown job type: {self.job.job_type}")
             
@@ -484,6 +488,75 @@ class PDFProcessor:
                 self.update_progress(progress, file_idx + 1)
             except Exception as e:
                 logger.error(f"Error watermarking file {file_path}: {str(e)}")
+                continue
+        return output_files
+
+    def unlock_pdfs(self):
+        """Unlock protected PDF files"""
+        input_files = json.loads(self.job.input_files)
+        settings = json.loads(self.job.settings) if self.job.settings else {}
+        password = settings.get('password')
+        if not password:
+            raise ValueError("Password is required for unlocking")
+        
+        output_files = []
+        for file_idx, file_path in enumerate(input_files):
+            try:
+                reader = PdfReader(file_path)
+                if reader.is_encrypted:
+                    reader.decrypt(password)
+                
+                writer = PdfWriter()
+                for page in reader.pages:
+                    writer.add_page(page)
+                
+                base_name = os.path.splitext(os.path.basename(file_path))[0]
+                output_filename = generate_unique_filename(f"{base_name}_unlocked.pdf")
+                output_path = os.path.join("processed", output_filename)
+                
+                with open(output_path, 'wb') as f:
+                    writer.write(f)
+                output_files.append(output_path)
+                
+                progress = int((file_idx + 1) / len(input_files) * 100)
+                self.update_progress(progress, file_idx + 1)
+            except Exception as e:
+                logger.error(f"Error unlocking file {file_path}: {str(e)}")
+                continue
+        return output_files
+
+    def extract_images_pdfs(self):
+        """Extract images from PDF files"""
+        input_files = json.loads(self.job.input_files)
+        output_files = []
+        
+        for file_idx, file_path in enumerate(input_files):
+            try:
+                import fitz
+                doc = fitz.open(file_path)
+                base_name = os.path.splitext(os.path.basename(file_path))[0]
+                
+                extracted_images = []
+                for i in range(len(doc)):
+                    for img in doc.get_page_images(i):
+                        xref = img[0]
+                        base_image = doc.extract_image(xref)
+                        image_bytes = base_image["image"]
+                        image_ext = base_image["ext"]
+                        image_filename = generate_unique_filename(f"{base_name}_p{i+1}_img.{image_ext}")
+                        image_path = os.path.join("processed", image_filename)
+                        
+                        with open(image_path, "wb") as f:
+                            f.write(image_bytes)
+                        extracted_images.append(image_path)
+                
+                doc.close()
+                output_files.extend(extracted_images)
+                
+                progress = int((file_idx + 1) / len(input_files) * 100)
+                self.update_progress(progress, file_idx + 1)
+            except Exception as e:
+                logger.error(f"Error extracting images from {file_path}: {str(e)}")
                 continue
         return output_files
 

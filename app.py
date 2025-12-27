@@ -25,11 +25,11 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 }
 
 # App configuration
-app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB max file size
+app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100MB max file size
 app.config["UPLOAD_FOLDER"] = "uploads"
 app.config["PROCESSED_FOLDER"] = "processed"
-app.config["FREE_USER_FILE_LIMIT"] = 10 * 1024 * 1024  # 10MB per file for free users
-app.config["FREE_USER_BATCH_LIMIT"] = 5  # 5 files per batch for free users
+app.config["FREE_USER_FILE_LIMIT"] = 5 * 1024 * 1024  # 5MB per file for free users
+app.config["FREE_USER_BATCH_LIMIT"] = 3  # 3 files per batch for free users
 
 # Initialize the app with the extension
 db.init_app(app)

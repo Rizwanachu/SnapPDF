@@ -30,7 +30,11 @@
                         <input type="file" id="fileInput" multiple accept=".pdf" style="display: none;">
                         <div class="mt-3">
                             <small class="text-muted">
-                                Maximum file size: 10MB per file (Free) | Maximum 5 files per batch (Free)
+                                {% if current_user.is_premium %}
+                                    <i class="fas fa-crown text-warning"></i> Premium: Unlimited files, 100MB per file
+                                {% else %}
+                                    Free Tier: 5MB per file | Max 3 files per batch
+                                {% endif %}
                             </small>
                         </div>
                     </div>
@@ -139,6 +143,28 @@
                             <h5 class="card-title">Watermark PDF</h5>
                             <p class="card-text">Add text watermark to your PDF pages</p>
                             <button class="btn btn-secondary" onclick="showWatermarkDialog()">Select</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card tool-card h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-unlock text-danger mb-3" style="font-size: 2.5rem;"></i>
+                            <h5 class="card-title">Unlock PDF</h5>
+                            <p class="card-text">Remove password protection from your PDF</p>
+                            <button class="btn btn-danger" onclick="showUnlockDialog()">Select</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card tool-card h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-images text-success mb-3" style="font-size: 2.5rem;"></i>
+                            <h5 class="card-title">Extract Images</h5>
+                            <p class="card-text">Extract all images from your PDF document</p>
+                            <button class="btn btn-success" onclick="selectTool('extract_images')">Select</button>
                         </div>
                     </div>
                 </div>
@@ -439,6 +465,31 @@ function showWatermarkDialog() {
         }
         modal.hide();
         selectTool('watermark', { watermark_text: text });
+    };
+    modal.show();
+}
+
+function showUnlockDialog() {
+    if (uploadedFiles.length === 0) {
+        showMessage('Please upload files first', 'warning');
+        return;
+    }
+    const modal = new bootstrap.Modal(document.getElementById('toolOptionsModal'));
+    document.getElementById('modalTitle').innerText = 'Unlock PDF';
+    document.getElementById('modalBody').innerHTML = `
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" id="unlockPassword" class="form-control" placeholder="Enter password to unlock PDF">
+        </div>
+    `;
+    document.getElementById('modalConfirmBtn').onclick = () => {
+        const password = document.getElementById('unlockPassword').value;
+        if (!password) {
+            alert('Please enter the password');
+            return;
+        }
+        modal.hide();
+        selectTool('unlock', { password: password });
     };
     modal.show();
 }
