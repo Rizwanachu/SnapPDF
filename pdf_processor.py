@@ -59,6 +59,12 @@ class PDFProcessor:
                 result = self.convert_to_word()
             elif self.job.job_type == JobType.CONVERT_EXCEL:
                 result = self.convert_to_excel()
+            elif self.job.job_type == JobType.PROTECT:
+                result = self.protect_pdfs()
+            elif self.job.job_type == JobType.ROTATE:
+                result = self.rotate_pdfs()
+            elif self.job.job_type == JobType.WATERMARK:
+                result = self.watermark_pdfs()
             else:
                 raise ValueError(f"Unknown job type: {self.job.job_type}")
             
@@ -368,43 +374,117 @@ class PDFProcessor:
                 continue
         
         return output_files
-    
-    def convert_to_excel(self):
-        """Convert PDF files to Excel spreadsheets"""
+
+    def protect_pdfs(self):
+        """Protect PDF files with a password"""
         input_files = json.loads(self.job.input_files)
-        output_files = []
+        settings = json.loads(self.job.settings) if self.job.settings else {}
+        password = settings.get('password')
+        if not password:
+            raise ValueError("Password is required for protection")
         
+        output_files = []
         for file_idx, file_path in enumerate(input_files):
             try:
-                with open(file_path, 'rb') as file:
-                    reader = PdfReader(file)
-                    wb = openpyxl.Workbook()
-                    ws = wb.active
-                    ws.title = "PDF Content"
-                    
-                    row = 1
-                    for page_num, page in enumerate(reader.pages):
-                        text = page.extract_text()
-                        if text.strip():
-                            ws.cell(row=row, column=1, value=f"Page {page_num + 1}")
-                            row += 1
-                            ws.cell(row=row, column=1, value=text)
-                            row += 2
-                    
-                    base_name = os.path.splitext(os.path.basename(file_path))[0]
-                    output_filename = generate_unique_filename(f"{base_name}.xlsx")
-                    output_path = os.path.join("processed", output_filename)
-                    
-                    wb.save(output_path)
-                    output_files.append(output_path)
+                reader = PdfReader(file_path)
+                writer = PdfWriter()
+                for page in reader.pages:
+                    writer.add_page(page)
+                writer.encrypt(password)
+                
+                base_name = os.path.splitext(os.path.basename(file_path))[0]
+                output_filename = generate_unique_filename(f"{base_name}_protected.pdf")
+                output_path = os.path.join("processed", output_filename)
+                
+                with open(output_path, 'wb') as f:
+                    writer.write(f)
+                output_files.append(output_path)
                 
                 progress = int((file_idx + 1) / len(input_files) * 100)
                 self.update_progress(progress, file_idx + 1)
-                
             except Exception as e:
-                logger.error(f"Error converting file {file_path} to Excel: {str(e)}")
+                logger.error(f"Error protecting file {file_path}: {str(e)}")
                 continue
+        return output_files
+
+    def rotate_pdfs(self):
+        """Rotate PDF files"""
+        input_files = json.loads(self.job.input_files)
+        settings = json.loads(self.job.settings) if self.job.settings else {}
+        rotation = int(settings.get('rotation', 90))
         
+        output_files = []
+        for file_idx, file_path in enumerate(input_files):
+            try:
+                reader = PdfReader(file_path)
+                writer = PdfWriter()
+                for page in reader.pages:
+                    page.rotate(rotation)
+                    writer.add_page(page)
+                
+                base_name = os.path.splitext(os.path.basename(file_path))[0]
+                output_filename = generate_unique_filename(f"{base_name}_rotated.pdf")
+                output_path = os.path.join("processed", output_filename)
+                
+                with open(output_path, 'wb') as f:
+                    writer.write(f)
+                output_files.append(output_path)
+                
+                progress = int((file_idx + 1) / len(input_files) * 100)
+                self.update_progress(progress, file_idx + 1)
+            except Exception as e:
+                logger.error(f"Error rotating file {file_path}: {str(e)}")
+                continue
+        return output_files
+
+    def watermark_pdfs(self):
+        """Add watermark to PDF files"""
+        input_files = json.loads(self.job.input_files)
+        settings = json.loads(self.job.settings) if self.job.settings else {}
+        text = settings.get('watermark_text', 'CONFIDENTIAL')
+        
+        output_files = []
+        for file_idx, file_path in enumerate(input_files):
+            try:
+                from reportlab.pdfgen import canvas
+                from reportlab.lib.pagesizes import letter
+                import io
+                
+                # Create watermark
+                packet = io.BytesIO()
+                can = canvas.Canvas(packet, pagesize=letter)
+                can.setFont("Helvetica", 40)
+                can.setStrokeColorRGB(0.5, 0.5, 0.5, 0.3)
+                can.setFillColorRGB(0.5, 0.5, 0.5, 0.3)
+                can.saveState()
+                can.translate(300, 400)
+                can.rotate(45)
+                can.drawCentredString(0, 0, text)
+                can.restoreState()
+                can.save()
+                packet.seek(0)
+                watermark_reader = PdfReader(packet)
+                watermark_page = watermark_reader.pages[0]
+
+                reader = PdfReader(file_path)
+                writer = PdfWriter()
+                for page in reader.pages:
+                    page.merge_page(watermark_page)
+                    writer.add_page(page)
+                
+                base_name = os.path.splitext(os.path.basename(file_path))[0]
+                output_filename = generate_unique_filename(f"{base_name}_watermarked.pdf")
+                output_path = os.path.join("processed", output_filename)
+                
+                with open(output_path, 'wb') as f:
+                    writer.write(f)
+                output_files.append(output_path)
+                
+                progress = int((file_idx + 1) / len(input_files) * 100)
+                self.update_progress(progress, file_idx + 1)
+            except Exception as e:
+                logger.error(f"Error watermarking file {file_path}: {str(e)}")
+                continue
         return output_files
 
 def create_zip_archive(file_paths, zip_filename):

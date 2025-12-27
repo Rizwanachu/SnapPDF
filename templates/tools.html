@@ -109,6 +109,58 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card tool-card h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-lock text-danger mb-3" style="font-size: 2.5rem;"></i>
+                            <h5 class="card-title">Protect PDF</h5>
+                            <p class="card-text">Add password protection to your PDF</p>
+                            <button class="btn btn-danger" onclick="showProtectDialog()">Select</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card tool-card h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-redo text-dark mb-3" style="font-size: 2.5rem;"></i>
+                            <h5 class="card-title">Rotate PDF</h5>
+                            <p class="card-text">Rotate PDF pages by 90, 180, or 270 degrees</p>
+                            <button class="btn btn-dark" onclick="showRotateDialog()">Select</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card tool-card h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-stamp text-secondary mb-3" style="font-size: 2.5rem;"></i>
+                            <h5 class="card-title">Watermark PDF</h5>
+                            <p class="card-text">Add text watermark to your PDF pages</p>
+                            <button class="btn btn-secondary" onclick="showWatermarkDialog()">Select</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals for Tool Options -->
+    <div class="modal fade" id="toolOptionsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Tool Options</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Dynamic content -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="modalConfirmBtn">Start Processing</button>
+                </div>
             </div>
         </div>
     </div>
@@ -304,7 +356,7 @@ function clearFiles() {
     showMessage('Files cleared successfully', 'info');
 }
 
-function selectTool(tool) {
+function selectTool(tool, settings = {}) {
     selectedTool = tool;
     
     if (uploadedFiles.length === 0) {
@@ -312,14 +364,86 @@ function selectTool(tool) {
         return;
     }
     
-    // Show processing indicator
-    showMessage('Starting processing...', 'info');
-    
-    // Process files
-    processFiles();
+    // Process files with optional settings
+    processFiles(settings);
 }
 
-function processFiles() {
+function showProtectDialog() {
+    if (uploadedFiles.length === 0) {
+        showMessage('Please upload files first', 'warning');
+        return;
+    }
+    const modal = new bootstrap.Modal(document.getElementById('toolOptionsModal'));
+    document.getElementById('modalTitle').innerText = 'Protect PDF';
+    document.getElementById('modalBody').innerHTML = `
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" id="pdfPassword" class="form-control" placeholder="Enter password to protect PDF">
+        </div>
+    `;
+    document.getElementById('modalConfirmBtn').onclick = () => {
+        const password = document.getElementById('pdfPassword').value;
+        if (!password) {
+            alert('Please enter a password');
+            return;
+        }
+        modal.hide();
+        selectTool('protect', { password: password });
+    };
+    modal.show();
+}
+
+function showRotateDialog() {
+    if (uploadedFiles.length === 0) {
+        showMessage('Please upload files first', 'warning');
+        return;
+    }
+    const modal = new bootstrap.Modal(document.getElementById('toolOptionsModal'));
+    document.getElementById('modalTitle').innerText = 'Rotate PDF';
+    document.getElementById('modalBody').innerHTML = `
+        <div class="mb-3">
+            <label class="form-label">Rotation Angle</label>
+            <select id="pdfRotation" class="form-select">
+                <option value="90">90° Clockwise</option>
+                <option value="180">180°</option>
+                <option value="270">270° Clockwise</option>
+            </select>
+        </div>
+    `;
+    document.getElementById('modalConfirmBtn').onclick = () => {
+        const rotation = document.getElementById('pdfRotation').value;
+        modal.hide();
+        selectTool('rotate', { rotation: rotation });
+    };
+    modal.show();
+}
+
+function showWatermarkDialog() {
+    if (uploadedFiles.length === 0) {
+        showMessage('Please upload files first', 'warning');
+        return;
+    }
+    const modal = new bootstrap.Modal(document.getElementById('toolOptionsModal'));
+    document.getElementById('modalTitle').innerText = 'Watermark PDF';
+    document.getElementById('modalBody').innerHTML = `
+        <div class="mb-3">
+            <label class="form-label">Watermark Text</label>
+            <input type="text" id="watermarkText" class="form-control" placeholder="CONFIDENTIAL" value="CONFIDENTIAL">
+        </div>
+    `;
+    document.getElementById('modalConfirmBtn').onclick = () => {
+        const text = document.getElementById('watermarkText').value;
+        if (!text) {
+            alert('Please enter watermark text');
+            return;
+        }
+        modal.hide();
+        selectTool('watermark', { watermark_text: text });
+    };
+    modal.show();
+}
+
+function processFiles(settings = {}) {
     // Show processing indicator
     setProcessingState(true);
     
@@ -348,7 +472,8 @@ function processFiles() {
                 },
                 body: JSON.stringify({
                     job_type: selectedTool,
-                    file_ids: fileIds
+                    file_ids: fileIds,
+                    settings: settings
                 })
             });
         } else {

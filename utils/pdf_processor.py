@@ -214,3 +214,79 @@ class PDFProcessor:
                 'error': f'Error merging PDFs: {str(e)}',
                 'success': False
             }
+
+    def compress_pdf(self, pdf_path, output_dir):
+        """Compress PDF by reducing quality of images and removing metadata"""
+        try:
+            from PyPDF2 import PdfReader, PdfWriter
+            reader = PdfReader(pdf_path)
+            writer = PdfWriter()
+
+            for page in reader.pages:
+                page.compress_content_streams()
+                writer.add_page(page)
+
+            output_filename = f"compressed_{os.path.basename(pdf_path)}"
+            output_path = os.path.join(output_dir, output_filename)
+
+            with open(output_path, "wb") as f:
+                writer.write(f)
+
+            return {
+                'output_file': output_filename,
+                'success': True
+            }
+        except Exception as e:
+            logger.error(f"Error compressing PDF: {str(e)}")
+            return {'error': str(e), 'success': False}
+
+    def protect_pdf(self, pdf_path, output_dir, password):
+        """Protect PDF with a password"""
+        try:
+            from PyPDF2 import PdfReader, PdfWriter
+            reader = PdfReader(pdf_path)
+            writer = PdfWriter()
+
+            for page in reader.pages:
+                writer.add_page(page)
+
+            writer.encrypt(password)
+
+            output_filename = f"protected_{os.path.basename(pdf_path)}"
+            output_path = os.path.join(output_dir, output_filename)
+
+            with open(output_path, "wb") as f:
+                writer.write(f)
+
+            return {
+                'output_file': output_filename,
+                'success': True
+            }
+        except Exception as e:
+            logger.error(f"Error protecting PDF: {str(e)}")
+            return {'error': str(e), 'success': False}
+
+    def rotate_pdf(self, pdf_path, output_dir, rotation=90):
+        """Rotate all pages in a PDF"""
+        try:
+            from PyPDF2 import PdfReader, PdfWriter
+            reader = PdfReader(pdf_path)
+            writer = PdfWriter()
+
+            for page in reader.pages:
+                page.rotate(rotation)
+                writer.add_page(page)
+
+            output_filename = f"rotated_{os.path.basename(pdf_path)}"
+            output_path = os.path.join(output_dir, output_filename)
+
+            with open(output_path, "wb") as f:
+                writer.write(f)
+
+            return {
+                'output_file': output_filename,
+                'success': True
+            }
+        except Exception as e:
+            logger.error(f"Error rotating PDF: {str(e)}")
+            return {'error': str(e), 'success': False}

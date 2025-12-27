@@ -18,6 +18,11 @@ class JobType(Enum):
     SPLIT = "split"
     COMPRESS = "compress"
     OCR = "ocr"
+    PROTECT = "protect"
+    UNLOCK = "unlock"
+    WATERMARK = "watermark"
+    ROTATE = "rotate"
+    EXTRACT_IMAGES = "extract_images"
     CONVERT_WORD = "convert_word"
     CONVERT_EXCEL = "convert_excel"
 
