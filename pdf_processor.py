@@ -956,8 +956,46 @@ class PDFProcessor:
         return output_files
 
     def edit_pdf(self):
-        """Placeholder for advanced PDF editing - currently just re-saves"""
-        return self.repair_pdf()
+        """Edit PDF content - basic implementation adding a text layer or overlay"""
+        input_files = json.loads(self.job.input_files)
+        settings = json.loads(self.job.settings) if self.job.settings else {}
+        edit_text = settings.get('edit_text', 'Edited with SnapPDF')
+        output_files = []
+        
+        for file_idx, file_path in enumerate(input_files):
+            try:
+                from reportlab.pdfgen import canvas
+                import io
+                
+                reader = PdfReader(file_path)
+                writer = PdfWriter()
+                
+                for page in reader.pages:
+                    packet = io.BytesIO()
+                    can = canvas.Canvas(packet)
+                    can.setFont("Helvetica", 12)
+                    can.drawString(100, 100, edit_text)
+                    can.save()
+                    packet.seek(0)
+                    
+                    overlay = PdfReader(packet).pages[0]
+                    page.merge_page(overlay)
+                    writer.add_page(page)
+                
+                base_name = os.path.splitext(os.path.basename(file_path))[0]
+                output_filename = generate_unique_filename(f"{base_name}_edited.pdf")
+                output_path = os.path.join("processed", output_filename)
+                
+                with open(output_path, 'wb') as f:
+                    writer.write(f)
+                output_files.append(output_path)
+                
+                progress = int((file_idx + 1) / len(input_files) * 100)
+                self.update_progress(progress, file_idx + 1)
+            except Exception as e:
+                logger.error(f"Error editing PDF {file_path}: {str(e)}")
+                continue
+        return output_files
 
     def sign_pdf(self):
         """Sign PDF (add signature text to last page)"""
