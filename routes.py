@@ -3,6 +3,7 @@ import json
 import uuid
 import logging
 from datetime import datetime, timedelta
+from urllib.parse import urlparse
 from flask import session, render_template, request, redirect, url_for, flash, jsonify, send_file, abort, Response
 from werkzeug.utils import secure_filename
 from flask_login import current_user, login_user, logout_user, login_required
@@ -80,7 +81,11 @@ def login():
         if user and user.check_password(form.password.data):
             login_user(user)
             next_page = request.args.get('next')
-            if not next_page or not next_page.startswith('/'):
+            if next_page:
+                parsed = urlparse(next_page)
+                if parsed.netloc or not next_page.startswith('/'):
+                    next_page = None
+            if not next_page:
                 next_page = url_for('tools')
             return redirect(next_page)
         else:
