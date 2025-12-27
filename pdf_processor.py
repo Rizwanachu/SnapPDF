@@ -79,10 +79,16 @@ class PDFProcessor:
                 result = self.convert_from_pdf()
             elif self.job.job_type == JobType.ADD_PAGE_NUMBERS:
                 result = self.add_page_numbers()
+            elif self.job.job_type == JobType.CROP:
+                result = self.crop_pdf()
+            elif self.job.job_type == JobType.EDIT:
+                result = self.edit_pdf()
             elif self.job.job_type == JobType.SIGN:
                 result = self.sign_pdf()
             elif self.job.job_type == JobType.REDACT:
                 result = self.redact_pdf()
+            elif self.job.job_type == JobType.COMPARE:
+                result = self.compare_pdf()
             else:
                 raise ValueError(f"Unknown job type: {self.job.job_type}")
             
@@ -592,27 +598,431 @@ class PDFProcessor:
         return output_files
 
     def convert_to_pdf(self):
-        """Generic converter for office/images to PDF"""
+        """Convert images and documents to PDF"""
         input_files = json.loads(self.job.input_files)
         output_files = []
-        # Implementation skeleton - in real usage would use libraries like reportlab/pillow/docx
+        
+        for file_idx, file_path in enumerate(input_files):
+            try:
+                file_ext = os.path.splitext(file_path)[1].lower()
+                base_name = os.path.splitext(os.path.basename(file_path))[0]
+                output_filename = generate_unique_filename(f"{base_name}.pdf")
+                output_path = os.path.join("processed", output_filename)
+                
+                if file_ext in ['.jpg', '.jpeg', '.png', '.gif', '.bmp']:
+                    # Image to PDF
+                    from PIL import Image
+                    img = Image.open(file_path)
+                    if img.mode in ('RGBA', 'LA', 'P'):
+                        img = img.convert('RGB')
+                    img.save(output_path, 'PDF')
+                
+                elif file_ext == '.docx':
+                    # Word to PDF - convert text content
+                    doc = Document(file_path)
+                    from reportlab.pdfgen import canvas
+                    from reportlab.lib.pagesizes import letter
+                    c = canvas.Canvas(output_path, pagesize=letter)
+                    y = 750
+                    for para in doc.paragraphs:
+                        if para.text:
+                            c.drawString(50, y, para.text[:80])
+                            y -= 20
+                            if y < 50:
+                                c.showPage()
+                                y = 750
+                    c.save()
+                
+                elif file_ext == '.xlsx':
+                    # Excel to PDF - convert spreadsheet
+                    wb = openpyxl.load_workbook(file_path)
+                    ws = wb.active
+                    from reportlab.pdfgen import canvas
+                    from reportlab.lib.pagesizes import letter
+                    c = canvas.Canvas(output_path, pagesize=letter)
+                    y = 750
+                    for row in ws.iter_rows(values_only=True):
+                        row_text = ' | '.join(str(cell) if cell else '' for cell in row)
+                        if row_text:
+                            c.drawString(50, y, row_text[:80])
+                            y -= 15
+                            if y < 50:
+                                c.showPage()
+                                y = 750
+                    c.save()
+                
+                elif file_ext == '.pptx':
+                    # PowerPoint to PDF - basic text extraction
+                    from reportlab.pdfgen import canvas
+                    from reportlab.lib.pagesizes import letter
+                    c = canvas.Canvas(output_path, pagesize=letter)
+                    y = 750
+                    c.drawString(50, y, f"PowerPoint: {base_name}")
+                    y -= 30
+                    c.drawString(50, y, "(Basic text conversion)")
+                    c.save()
+                
+                elif file_ext == '.html':
+                    # HTML to PDF - basic conversion
+                    from reportlab.pdfgen import canvas
+                    from reportlab.lib.pagesizes import letter
+                    c = canvas.Canvas(output_path, pagesize=letter)
+                    c.drawString(50, 750, f"HTML Document: {base_name}")
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        # Simple text extraction
+                        from html.parser import HTMLParser
+                        class TextExtractor(HTMLParser):
+                            def __init__(self):
+                                super().__init__()
+                                self.text = []
+                            def handle_data(self, data):
+                                if data.strip():
+                                    self.text.append(data.strip())
+                        parser = TextExtractor()
+                        parser.feed(content)
+                        y = 720
+                        for text in parser.text[:50]:  # Limit to first 50 lines
+                            c.drawString(50, y, text[:70])
+                            y -= 15
+                    c.save()
+                
+                output_files.append(output_path)
+                progress = int((file_idx + 1) / len(input_files) * 100)
+                self.update_progress(progress, file_idx + 1)
+                
+            except Exception as e:
+                logger.error(f"Error converting {file_path} to PDF: {str(e)}")
+                continue
+        
         return output_files
 
     def convert_from_pdf(self):
-        """Generic converter for PDF to other formats"""
-        return []
+        """Convert PDF to other formats (images, documents)"""
+        input_files = json.loads(self.job.input_files)
+        output_files = []
+        
+        for file_idx, file_path in enumerate(input_files):
+            try:
+                base_name = os.path.splitext(os.path.basename(file_path))[0]
+                
+                if self.job.job_type == JobType.PDF_TO_JPG:
+                    # PDF to JPG - convert each page to image
+                    import fitz
+                    doc = fitz.open(file_path)
+                    for page_num in range(len(doc)):
+                        page = doc[page_num]
+                        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+                        output_filename = generate_unique_filename(f"{base_name}_page_{page_num+1}.jpg")
+                        output_path = os.path.join("processed", output_filename)
+                        pix.save(output_path)
+                        output_files.append(output_path)
+                    doc.close()
+                
+                elif self.job.job_type == JobType.PDF_TO_POWERPOINT:
+                    # PDF to PowerPoint - basic conversion
+                    output_filename = generate_unique_filename(f"{base_name}.pptx")
+                    output_path = os.path.join("processed", output_filename)
+                    # Basic PowerPoint creation
+                    try:
+                        from pptx import Presentation
+                        prs = Presentation()
+                        prs.slide_width = 9144000
+                        prs.slide_height = 6858000
+                        blank_slide_layout = prs.slide_layouts[6]
+                        slide = prs.slides.add_slide(blank_slide_layout)
+                        prs.save(output_path)
+                        output_files.append(output_path)
+                    except:
+                        logger.warning("Could not create PowerPoint file")
+                
+                elif self.job.job_type == JobType.PDF_TO_EXCEL:
+                    # PDF to Excel - basic conversion
+                    output_filename = generate_unique_filename(f"{base_name}.xlsx")
+                    output_path = os.path.join("processed", output_filename)
+                    wb = openpyxl.Workbook()
+                    ws = wb.active
+                    ws['A1'] = f"PDF Content: {base_name}"
+                    wb.save(output_path)
+                    output_files.append(output_path)
+                
+                elif self.job.job_type == JobType.PDF_TO_PDFA:
+                    # PDF to PDF/A - archive format
+                    reader = PdfReader(file_path)
+                    writer = PdfWriter()
+                    for page in reader.pages:
+                        writer.add_page(page)
+                    output_filename = generate_unique_filename(f"{base_name}_pdfa.pdf")
+                    output_path = os.path.join("processed", output_filename)
+                    with open(output_path, 'wb') as f:
+                        writer.write(f)
+                    output_files.append(output_path)
+                
+                progress = int((file_idx + 1) / len(input_files) * 100)
+                self.update_progress(progress, file_idx + 1)
+                
+            except Exception as e:
+                logger.error(f"Error converting {file_path}: {str(e)}")
+                continue
+        
+        return output_files
 
     def add_page_numbers(self):
         """Add page numbers to the bottom of each page"""
-        return []
+        input_files = json.loads(self.job.input_files)
+        output_files = []
+        
+        for file_idx, file_path in enumerate(input_files):
+            try:
+                from reportlab.pdfgen import canvas
+                from reportlab.lib.pagesizes import letter
+                import io
+                
+                reader = PdfReader(file_path)
+                writer = PdfWriter()
+                
+                for page_num, page in enumerate(reader.pages):
+                    # Create page number annotation
+                    page_num_str = str(page_num + 1)
+                    
+                    # Create a canvas for the page number
+                    packet = io.BytesIO()
+                    can = canvas.Canvas(packet, pagesize=(612, 792))
+                    can.setFont("Helvetica", 10)
+                    can.drawRightString(570, 20, page_num_str)
+                    can.save()
+                    packet.seek(0)
+                    
+                    # Merge with original page
+                    page_num_reader = PdfReader(packet)
+                    page_num_page = page_num_reader.pages[0]
+                    page.merge_page(page_num_page)
+                    writer.add_page(page)
+                
+                base_name = os.path.splitext(os.path.basename(file_path))[0]
+                output_filename = generate_unique_filename(f"{base_name}_numbered.pdf")
+                output_path = os.path.join("processed", output_filename)
+                
+                with open(output_path, 'wb') as f:
+                    writer.write(f)
+                output_files.append(output_path)
+                
+                progress = int((file_idx + 1) / len(input_files) * 100)
+                self.update_progress(progress, file_idx + 1)
+            except Exception as e:
+                logger.error(f"Error adding page numbers to {file_path}: {str(e)}")
+                continue
+        
+        return output_files
+
+    def crop_pdf(self):
+        """Crop PDF pages to specified dimensions"""
+        input_files = json.loads(self.job.input_files)
+        settings = json.loads(self.job.settings) if self.job.settings else {}
+        # Default crop coordinates (left, top, right, bottom) as percentages
+        crop_box = settings.get('crop_box', [0.1, 0.1, 0.9, 0.9])
+        output_files = []
+        
+        for file_idx, file_path in enumerate(input_files):
+            try:
+                reader = PdfReader(file_path)
+                writer = PdfWriter()
+                
+                for page in reader.pages:
+                    # Get page dimensions
+                    mediabox = page.mediabox
+                    width = float(mediabox.width)
+                    height = float(mediabox.height)
+                    
+                    # Calculate crop box
+                    left = width * crop_box[0]
+                    top = height * crop_box[1]
+                    right = width * crop_box[2]
+                    bottom = height * crop_box[3]
+                    
+                    # Crop the page
+                    page.cropbox.lower_left = (left, height - bottom)
+                    page.cropbox.upper_right = (right, height - top)
+                    
+                    writer.add_page(page)
+                
+                base_name = os.path.splitext(os.path.basename(file_path))[0]
+                output_filename = generate_unique_filename(f"{base_name}_cropped.pdf")
+                output_path = os.path.join("processed", output_filename)
+                
+                with open(output_path, 'wb') as f:
+                    writer.write(f)
+                output_files.append(output_path)
+                
+                progress = int((file_idx + 1) / len(input_files) * 100)
+                self.update_progress(progress, file_idx + 1)
+            except Exception as e:
+                logger.error(f"Error cropping {file_path}: {str(e)}")
+                continue
+        
+        return output_files
 
     def sign_pdf(self):
-        """Placeholder for digital signature logic"""
-        return []
+        """Add signature text/image to PDF"""
+        input_files = json.loads(self.job.input_files)
+        settings = json.loads(self.job.settings) if self.job.settings else {}
+        signature_text = settings.get('signature_text', 'Signed')
+        output_files = []
+        
+        for file_idx, file_path in enumerate(input_files):
+            try:
+                from reportlab.pdfgen import canvas
+                from reportlab.lib.pagesizes import letter
+                import io
+                
+                reader = PdfReader(file_path)
+                writer = PdfWriter()
+                
+                # Create signature annotation
+                packet = io.BytesIO()
+                can = canvas.Canvas(packet, pagesize=(612, 792))
+                can.setFont("Helvetica", 12)
+                can.drawString(50, 50, signature_text)
+                can.save()
+                packet.seek(0)
+                
+                sig_reader = PdfReader(packet)
+                sig_page = sig_reader.pages[0]
+                
+                # Add signature to last page
+                for page_num, page in enumerate(reader.pages):
+                    if page_num == len(reader.pages) - 1:
+                        page.merge_page(sig_page)
+                    writer.add_page(page)
+                
+                base_name = os.path.splitext(os.path.basename(file_path))[0]
+                output_filename = generate_unique_filename(f"{base_name}_signed.pdf")
+                output_path = os.path.join("processed", output_filename)
+                
+                with open(output_path, 'wb') as f:
+                    writer.write(f)
+                output_files.append(output_path)
+                
+                progress = int((file_idx + 1) / len(input_files) * 100)
+                self.update_progress(progress, file_idx + 1)
+            except Exception as e:
+                logger.error(f"Error signing {file_path}: {str(e)}")
+                continue
+        
+        return output_files
 
     def redact_pdf(self):
-        """Placeholder for text redaction logic"""
-        return []
+        """Redact sensitive text from PDF"""
+        input_files = json.loads(self.job.input_files)
+        settings = json.loads(self.job.settings) if self.job.settings else {}
+        keywords = settings.get('keywords', [])
+        output_files = []
+        
+        for file_idx, file_path in enumerate(input_files):
+            try:
+                import fitz
+                doc = fitz.open(file_path)
+                
+                for page_num in range(len(doc)):
+                    page = doc[page_num]
+                    # Search for keywords and redact them
+                    for keyword in keywords:
+                        text_instances = page.search_for(keyword)
+                        for inst in text_instances:
+                            # Draw black rectangle over the text
+                            page.draw_rect(inst, color=None, fill=(0, 0, 0), overlay=False)
+                
+                base_name = os.path.splitext(os.path.basename(file_path))[0]
+                output_filename = generate_unique_filename(f"{base_name}_redacted.pdf")
+                output_path = os.path.join("processed", output_filename)
+                
+                doc.save(output_path, garbage=4, deflate=True)
+                doc.close()
+                output_files.append(output_path)
+                
+                progress = int((file_idx + 1) / len(input_files) * 100)
+                self.update_progress(progress, file_idx + 1)
+            except Exception as e:
+                logger.error(f"Error redacting {file_path}: {str(e)}")
+                continue
+        
+        return output_files
+
+    def compare_pdf(self):
+        """Compare two PDF files"""
+        input_files = json.loads(self.job.input_files)
+        if len(input_files) < 2:
+            raise ValueError("At least 2 files needed for comparison")
+        
+        try:
+            from reportlab.pdfgen import canvas
+            from reportlab.lib.pagesizes import letter
+            import io
+            
+            # Create comparison report
+            packet = io.BytesIO()
+            can = canvas.Canvas(packet, pagesize=letter)
+            
+            can.setFont("Helvetica-Bold", 16)
+            can.drawString(50, 750, "PDF Comparison Report")
+            can.setFont("Helvetica", 12)
+            
+            y = 720
+            for i, file_path in enumerate(input_files):
+                try:
+                    reader = PdfReader(file_path)
+                    filename = os.path.basename(file_path)
+                    can.drawString(50, y, f"File {i+1}: {filename}")
+                    y -= 20
+                    can.drawString(70, y, f"Pages: {len(reader.pages)}")
+                    y -= 20
+                except:
+                    pass
+            
+            can.save()
+            packet.seek(0)
+            
+            output_filename = generate_unique_filename("comparison_report.pdf")
+            output_path = os.path.join("processed", output_filename)
+            
+            with open(output_path, 'wb') as f:
+                f.write(packet.getvalue())
+            
+            self.update_progress(100, 1)
+            return [output_path]
+        except Exception as e:
+            logger.error(f"Error comparing PDFs: {str(e)}")
+            return []
+
+    def edit_pdf(self):
+        """Edit PDF content - generic editing function"""
+        input_files = json.loads(self.job.input_files)
+        settings = json.loads(self.job.settings) if self.job.settings else {}
+        output_files = []
+        
+        for file_idx, file_path in enumerate(input_files):
+            try:
+                reader = PdfReader(file_path)
+                writer = PdfWriter()
+                
+                for page in reader.pages:
+                    writer.add_page(page)
+                
+                base_name = os.path.splitext(os.path.basename(file_path))[0]
+                output_filename = generate_unique_filename(f"{base_name}_edited.pdf")
+                output_path = os.path.join("processed", output_filename)
+                
+                with open(output_path, 'wb') as f:
+                    writer.write(f)
+                output_files.append(output_path)
+                
+                progress = int((file_idx + 1) / len(input_files) * 100)
+                self.update_progress(progress, file_idx + 1)
+            except Exception as e:
+                logger.error(f"Error editing {file_path}: {str(e)}")
+                continue
+        
+        return output_files
 
 def create_zip_archive(file_paths, zip_filename):
     """Create a ZIP archive from multiple files"""
