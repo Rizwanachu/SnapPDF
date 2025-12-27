@@ -119,6 +119,39 @@ body {
     color: #f8fafc;
 }
 
+/* Mobile Responsiveness Improvements */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem !important;
+    }
+    
+    .lead {
+        font-size: 1rem !important;
+    }
+    
+    .upload-area {
+        padding: 2rem 1rem !important;
+    }
+    
+    .tool-card .card-body {
+        padding: 1rem !important;
+    }
+    
+    .navbar-brand img {
+        height: 35px;
+    }
+    
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .row.g-2 {
+        --bs-gutter-x: 0.5rem;
+        --bs-gutter-y: 0.5rem;
+    }
+}
+
 .custom-message {
     border-radius: 12px;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
