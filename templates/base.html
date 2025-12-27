@@ -28,9 +28,9 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('premium') }}">
                                 {% if current_user.has_active_subscription() %}
-                                    <i class="fas fa-crown text-warning"></i> Premium
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-bolt"></i> PRO</span>
                                 {% else %}
-                                    <i class="fas fa-star"></i> Go Premium
+                                    <i class="fas fa-star text-warning"></i> Get Pro
                                 {% endif %}
                             </a>
                         </li>

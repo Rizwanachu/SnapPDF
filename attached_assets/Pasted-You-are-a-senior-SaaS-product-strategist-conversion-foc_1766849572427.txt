@@ -1,0 +1,78 @@
+You are a senior SaaS product strategist, conversion-focused UX writer, and monetization expert.
+
+I am building a Flask-based Online PDF Tools web app called SnapPDF with features like merge, split, compress, OCR, convert to Word/Excel, watermark, protect/unlock, rotate pages, extract images, and background job processing.
+
+The app already works. Your task is to redesign the premium experience so users WANT to upgrade immediately, without using dark patterns or breaking trust.
+
+–––––––––––––––––
+PRIMARY GOAL
+–––––––––––––––––
+Maximize free → premium conversion by:
+- Framing premium as relief, speed, and certainty
+- Locking the RIGHT features (not the core wow moment)
+- Adding emotional upgrade triggers at the perfect moments
+
+–––––––––––––––––
+DELIVERABLES
+–––––––––––––––––
+
+A) PREMIUM POSITIONING
+- Rename “Premium” to something more desirable (example: SnapPDF Pro / Unlimited Mode / No Limits Pass)
+- Write:
+  - One-sentence premium value proposition
+  - 3 short benefit bullets focused on removing friction (not features)
+
+B) FEATURE LOCKING STRATEGY (CRITICAL)
+- Decide which features should be:
+  - Always free (first win)
+  - Soft-limited (nudged)
+  - Hard-locked (premium only)
+- Suggest AT LEAST:
+  - 2 existing features to partially lock (limits, quality, speed)
+  - 2 new lightweight features that can be added easily and locked behind premium
+- For each locked feature, explain:
+  - Why it increases conversion
+  - When the upgrade prompt should appear
+
+C) PERFECT UPGRADE TRIGGERS
+- Design upgrade prompts for:
+  - File size limit hit
+  - Batch processing attempt
+  - Queue wait / slow processing
+  - High-quality compression selection
+  - OCR language selection
+- Provide exact copy for each modal (friendly, human, non-pushy)
+
+D) PRICING PSYCHOLOGY
+- Improve presentation of $4.99/month using: 
+  - Daily cost framing
+  - Risk reversal copy
+  - Trust microcopy
+- Write:
+  - Pricing page headline
+  - One emotional paragraph that sells premium without sounding salesy
+
+E) VIRAL + TRUST SIGNALS (NO TECH CHANGES)
+- Add:
+  - Usage-based trust messages
+  - Privacy reassurance copy
+  - Security reassurance copy
+- Suggest 3 shareable moments after processing
+- Provide exact share text examples users can copy
+
+F) UX RULES (DO NOT BREAK)
+- Define what must NEVER be locked
+- Define what can be limited without hurting trust
+- Define the moment when premium should be suggested and when it should not
+
+–––––––––––––––––
+CONSTRAINTS
+–––––––––––––––––
+- Do NOT suggest dark patterns
+- Do NOT remove free value
+- Do NOT require forced login before first success
+- Do NOT add paid third-party services
+- Focus on copy, UX, psychology, and smart feature gating
+- Output must be practical and implementation-ready
+
+Respond with clear sections, bullet points, exact copy, and actionable recommendations.

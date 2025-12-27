@@ -22,7 +22,7 @@ from flask_login import LoginManager
 from typing import Optional
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view: Optional[str] = 'login'
+login_manager.login_view = 'login'
 login_manager.login_message = 'Please log in to access this page.'
 
 @login_manager.user_loader
@@ -517,6 +517,11 @@ def premium():
 def create_premium_subscription():
     """Create premium subscription with verified status"""
     try:
+        # Only $4.99 per month
+        amount = 4.99
+        currency = "USD"
+        plan_name = "SnapPDF Pro"
+        
         # In a real app, we'd verify the payment via a webhook or API call here.
         # For now, we simulate a 'payment_id' coming from the frontend after success.
         payment_confirmed = request.form.get('payment_confirmed') == 'true'
@@ -533,6 +538,9 @@ def create_premium_subscription():
         subscription.status = SubscriptionStatus.ACTIVE
         subscription.activated_at = datetime.now()
         subscription.expires_at = datetime.now() + timedelta(days=30)
+        subscription.amount = amount
+        subscription.currency = currency
+        subscription.plan_name = plan_name
         
         db.session.add(subscription)
         
@@ -540,7 +548,7 @@ def create_premium_subscription():
         current_user.is_premium = True
         db.session.commit()
         
-        flash('Payment verified! Welcome to Premium. All features are now unlocked.', 'success')
+        flash('Welcome to SnapPDF Pro! Your unlimited document journey starts now.', 'success')
         return redirect(url_for('tools'))
         
     except Exception as e:

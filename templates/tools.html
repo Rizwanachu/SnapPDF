@@ -4,14 +4,19 @@
 
 {% block content %}
 <div class="container py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3">PDF Processing Tools</h1>
-                <div>
-                    <span class="badge bg-primary">Welcome, {{ user.first_name }}!</span>
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto text-center">
+            <h1 class="display-4 fw-bold mb-3">SnapPDF Tools</h1>
+            <p class="lead text-muted">Professional-grade PDF tools. Fast, secure, and entirely in your browser.</p>
+            {% if not current_user.is_premium %}
+            <div class="card bg-light border-0 shadow-sm d-inline-block p-2">
+                <div class="card-body py-2 px-3">
+                    <i class="fas fa-bolt text-warning me-2"></i> 
+                    <span class="small fw-bold">Free Plan:</span> <span class="small text-muted">5MB limit per file.</span> 
+                    <a href="{{ url_for('premium') }}" class="small fw-bold text-primary ms-2 text-decoration-none">Go Pro for unlimited size →</a>
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
 
@@ -32,12 +37,12 @@
                             <i class="fas fa-plus me-2"></i>Choose Files
                         </button>
                         <input type="file" id="fileInput" multiple accept=".pdf" style="display: none;">
-                        <div class="pt-3 border-top mx-5">
+                        <div class="mt-3">
                             <small class="text-muted">
                                 {% if current_user.is_premium %}
-                                    <i class="fas fa-crown text-warning"></i> Premium: Unlimited files, 100MB per file
+                                    <i class="fas fa-bolt text-warning"></i> SnapPDF Pro: 100MB limits & priority queue
                                 {% else %}
-                                    Free Tier: 5MB per file | Max 3 files per batch
+                                    <i class="fas fa-info-circle"></i> Free: 5MB per file | Max 3 files per batch
                                 {% endif %}
                             </small>
                         </div>
@@ -283,34 +288,42 @@ function handleFileSelect(event) {
     uploadFiles(files);
 }
 
-function uploadFiles(files) {
-    // Validate files before adding them
-    const validFiles = [];
-    const errors = [];
-    
-    files.forEach(file => {
-        if (file.type !== 'application/pdf') {
-            errors.push(`${file.name} is not a PDF file`);
+    function uploadFiles(files) {
+        // Validate files before adding them
+        const validFiles = [];
+        const errors = [];
+        const isPremium = {{ 'true' if current_user.is_premium else 'false' }};
+        const fileLimit = isPremium ? 100 * 1024 * 1024 : 5 * 1024 * 1024;
+        const batchLimit = isPremium ? 100 : 3;
+        
+        files.forEach(file => {
+            if (file.type !== 'application/pdf') {
+                errors.push(`${file.name} is not a PDF file`);
+                return;
+            }
+            
+            if (file.size > fileLimit) {
+                const limitText = isPremium ? "100MB" : "5MB";
+                const upgradePrompt = isPremium ? "" : ". <a href='/premium' class='fw-bold text-primary'>Upgrade to Pro for 100MB limits →</a>";
+                errors.push(`${file.name} exceeds ${limitText} limit${upgradePrompt}`);
+                return;
+            }
+            
+            validFiles.push(file);
+        });
+        
+        if (errors.length > 0) {
+            const errorContainer = document.createElement('div');
+            errorContainer.innerHTML = errors.join('<br>');
+            showMessage(errorContainer.innerHTML, 'error');
             return;
         }
         
-        if (file.size > 10 * 1024 * 1024) { // 10MB limit
-            errors.push(`${file.name} exceeds 10MB size limit`);
+        if (validFiles.length > batchLimit) {
+            const upgradePrompt = isPremium ? "" : " <a href='/premium' class='fw-bold text-primary'>Go Pro for batch processing up to 100 files →</a>";
+            showMessage(`Free tier limit: ${batchLimit} files per batch.${upgradePrompt}`, 'warning');
             return;
         }
-        
-        validFiles.push(file);
-    });
-    
-    if (errors.length > 0) {
-        showMessage('File validation errors: ' + errors.join(', '), 'error');
-        return;
-    }
-    
-    if (validFiles.length > 5) {
-        showMessage('Maximum 5 files allowed per batch', 'warning');
-        return;
-    }
     
     uploadedFiles = validFiles;
     updateUploadArea();
@@ -353,7 +366,10 @@ function updateUploadArea() {
                     ${filesList}
                 </div>
                 <div class="mt-4 pt-4 border-top text-center">
-                    <p class="text-muted">Choose a tool below to process these files</p>
+                    <p class="text-muted small mb-0">
+                        <i class="fas fa-shield-alt text-success me-1"></i> Your files are secure and will be auto-deleted in 24 hours.
+                    </p>
+                    <p class="text-muted small mt-2">Choose a tool below to start processing.</p>
                 </div>
             </div>
         `;
@@ -380,17 +396,17 @@ function clearFiles() {
     }
     
     const uploadArea = document.getElementById('uploadArea');
-    uploadArea.innerHTML = `
+        uploadArea.innerHTML = `
         <i class="fas fa-cloud-upload-alt mb-3" style="font-size: 3rem; color: #6c757d;"></i>
         <h5>Drag & Drop PDF Files</h5>
         <p class="text-muted">or <button class="btn btn-outline-primary" onclick="document.getElementById('fileInput').click()">Browse Files</button></p>
         <input type="file" id="fileInput" multiple accept=".pdf" style="display: none;">
         <div class="mt-3">
             <small class="text-muted">
-                {% if current_user.has_active_subscription() %}
-                    <i class="fas fa-crown text-warning"></i> Premium: Unlimited files, no size restrictions
+                {% if current_user.is_premium %}
+                    <i class="fas fa-bolt text-warning"></i> SnapPDF Pro: Unlimited files & priority queue
                 {% else %}
-                    Maximum file size: 10MB per file (Free) | Maximum 5 files per batch (Free)
+                    <i class="fas fa-info-circle"></i> Free: 5MB per file | Max 3 files per batch
                 {% endif %}
             </small>
         </div>
