@@ -16,19 +16,23 @@
     </div>
 
     <!-- File Upload Section -->
-    <div class="row mb-4">
+    <div class="row mb-5">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Upload Files</h5>
-                </div>
-                <div class="card-body">
-                    <div class="upload-area" id="uploadArea">
-                        <i class="fas fa-cloud-upload-alt mb-3" style="font-size: 3rem; color: #6c757d;"></i>
-                        <h5>Drag & Drop PDF Files</h5>
-                        <p class="text-muted">or <button class="btn btn-outline-primary" onclick="document.getElementById('fileInput').click()">Browse Files</button></p>
+            <div class="card border-0 bg-transparent">
+                <div class="card-body p-0">
+                    <div class="upload-area shadow-sm" id="uploadArea">
+                        <div class="mb-4">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-circle p-4 mb-3">
+                                <i class="fas fa-cloud-upload-alt text-primary" style="font-size: 3.5rem;"></i>
+                            </div>
+                        </div>
+                        <h2 class="fw-bold mb-3">Ready to process?</h2>
+                        <p class="text-muted fs-5 mb-4">Drag & drop your files here or use the button below</p>
+                        <button class="btn btn-primary btn-lg px-5 shadow-sm mb-4" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-plus me-2"></i>Choose Files
+                        </button>
                         <input type="file" id="fileInput" multiple accept=".pdf" style="display: none;">
-                        <div class="mt-3">
+                        <div class="pt-3 border-top mx-5">
                             <small class="text-muted">
                                 {% if current_user.is_premium %}
                                     <i class="fas fa-crown text-warning"></i> Premium: Unlimited files, 100MB per file
@@ -321,23 +325,47 @@ function updateUploadArea() {
     if (uploadedFiles.length > 0) {
         let filesList = '';
         uploadedFiles.forEach((file, index) => {
-            filesList += `<div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
-                <span><i class="fas fa-file-pdf text-danger me-2"></i>${file.name}</span>
-                <small class="text-muted">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+            filesList += `<div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-white border rounded shadow-sm">
+                <div class="d-flex align-items-center">
+                    <div class="bg-danger bg-opacity-10 rounded p-2 me-3">
+                        <i class="fas fa-file-pdf text-danger fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold text-dark">${file.name}</div>
+                        <small class="text-muted">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                    </div>
+                </div>
+                <button class="btn btn-link text-muted p-0" onclick="removeFile(${index})">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
             </div>`;
         });
         
         uploadArea.innerHTML = `
-            <i class="fas fa-check-circle text-success mb-3" style="font-size: 3rem;"></i>
-            <h5>Files Ready (${uploadedFiles.length})</h5>
-            <div class="mt-3 text-start" style="max-height: 200px; overflow-y: auto;">
-                ${filesList}
+            <div class="text-start">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold mb-0">${uploadedFiles.length} file(s) selected</h4>
+                    <button class="btn btn-outline-danger btn-sm" onclick="clearFiles()">
+                        <i class="fas fa-times me-1"></i> Clear All
+                    </button>
+                </div>
+                <div class="mt-3" style="max-height: 400px; overflow-y: auto;">
+                    ${filesList}
+                </div>
+                <div class="mt-4 pt-4 border-top text-center">
+                    <p class="text-muted">Choose a tool below to process these files</p>
+                </div>
             </div>
-            <p class="text-muted mt-3">Choose a processing tool below to continue</p>
-            <button class="btn btn-outline-secondary btn-sm" onclick="clearFiles()">
-                <i class="fas fa-times"></i> Clear Files
-            </button>
         `;
+    }
+}
+
+function removeFile(index) {
+    uploadedFiles.splice(index, 1);
+    if (uploadedFiles.length === 0) {
+        clearFiles();
+    } else {
+        updateUploadArea();
     }
 }
 
