@@ -29,6 +29,13 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 app.config["UPLOAD_FOLDER"] = os.path.join('/tmp', 'uploads')
 app.config["PROCESSED_FOLDER"] = os.path.join('/tmp', 'processed')
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100MB max file size
+
+# Ensure directories exist immediately at module level
+try:
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+    os.makedirs(app.config["PROCESSED_FOLDER"], exist_ok=True)
+except Exception as e:
+    logging.error(f"Module level directory creation error: {e}")
 app.config["FREE_USER_FILE_LIMIT"] = 5 * 1024 * 1024  # 5MB per file for free users
 app.config["FREE_USER_BATCH_LIMIT"] = 3  # 3 files per batch for free users
 app.config["PRO_USER_FILE_LIMIT"] = 100 * 1024 * 1024  # 100MB per file for pro users
@@ -51,8 +58,11 @@ with app.app_context():
     logging.info("Database tables created")
     
     # Ensure directories exist before cleanup
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-    os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
+    try:
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+        os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
+    except Exception as e:
+        logging.error(f"Directory creation error: {e}")
     
     # Cleanup old files on startup (only if not on Vercel to avoid cold start overhead)
     if not IS_VERCEL:
