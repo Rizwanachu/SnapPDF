@@ -58,8 +58,9 @@
         <div class="col-12">
             <div class="d-flex align-items-center mb-4">
                 <h4 class="mb-0 fw-bold">All PDF Tools</h4>
-                <div class="ms-3 badge bg-light text-dark border shadow-sm">
-                    <i class="fas fa-search me-1"></i> Filter tools
+                <div class="ms-3 position-relative">
+                    <input type="text" id="toolFilter" class="form-control form-control-sm border-0 shadow-sm" placeholder="Filter tools..." style="width: 200px; padding-left: 30px;">
+                    <i class="fas fa-search position-absolute text-muted" style="left: 10px; top: 50%; transform: translateY(-50%);"></i>
                 </div>
             </div>
 
@@ -474,6 +475,37 @@ function handleCameraSelect(e) {
             }
         }, 1000);
     }
+}
+
+// Tool filtering
+const toolFilter = document.getElementById('toolFilter');
+if (toolFilter) {
+    toolFilter.addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        const toolCards = document.querySelectorAll('.tool-card');
+        const sections = document.querySelectorAll('.mb-5');
+
+        toolCards.forEach(card => {
+            const name = card.querySelector('h6').innerText.toLowerCase();
+            const desc = card.querySelector('p').innerText.toLowerCase();
+            const isMatch = name.includes(query) || desc.includes(query);
+            
+            // Handle card visibility via column parent
+            const col = card.closest('[class*="col-"]');
+            if (col) {
+                col.style.display = isMatch ? '' : 'none';
+            }
+        });
+
+        // Hide sections with no visible cards
+        sections.forEach(section => {
+            const hasVisibleCards = Array.from(section.querySelectorAll('[class*="col-"]')).some(col => col.style.display !== 'none');
+            // Only toggle sections that contain tools (they have a h6 and a row)
+            if (section.querySelector('h6.text-uppercase') && section.querySelector('.row')) {
+                section.style.display = hasVisibleCards ? '' : 'none';
+            }
+        });
+    });
 }
 
 function handleFileSelect(event) {
