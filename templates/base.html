@@ -15,10 +15,11 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3 mb-4">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                <img src="{{ url_for('static', filename='logo.png') }}" alt="SnapPDF" height="45">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="SnapPDF" style="height: 40px; width: auto; object-fit: contain;" onerror="this.src='https://raw.githubusercontent.com/Rizwanachu/SnapPDF/main/static/logo.png'; this.onerror=null;">
+                <span class="ms-2 fw-bold text-dark h4 mb-0">SnapPDF</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -79,12 +80,15 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer py-5 mt-5 bg-light border-top">
         <div class="container">
-            <div class="row">
+            <div class="row g-4">
                 <div class="col-md-6">
-                    <img src="{{ url_for('static', filename='logo.png') }}" alt="SnapPDF" height="45" class="mb-3">
-                    <p class="text-muted">Powerful PDF processing tools for all your document needs.</p>
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{{ url_for('static', filename='logo.png') }}" alt="SnapPDF" style="height: 35px; width: auto;" onerror="this.src='https://raw.githubusercontent.com/Rizwanachu/SnapPDF/main/static/logo.png'; this.onerror=null;">
+                        <span class="ms-2 fw-bold text-dark h5 mb-0">SnapPDF</span>
+                    </div>
+                    <p class="text-muted small">Powerful PDF processing tools for all your document needs. Secured with SSL encryption and auto-deletion.</p>
                 </div>
                 <div class="col-md-6">
                     <h6>Links</h6>

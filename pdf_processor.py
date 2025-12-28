@@ -109,7 +109,8 @@ class PDFProcessor:
         """Merge multiple PDF files into one"""
         input_files = json.loads(self.job.input_files)
         output_filename = generate_unique_filename("merged_document.pdf")
-        output_path = os.path.join("processed", output_filename)
+        output_path = os.path.join(os.path.join('/tmp', 'processed'), output_filename)
+        os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
         
         writer = PdfWriter()
         
@@ -148,7 +149,8 @@ class PDFProcessor:
                         writer.add_page(page)
                         
                         output_filename = generate_unique_filename(f"{base_name}_page_{page_num + 1}.pdf")
-                        output_path = os.path.join("processed", output_filename)
+                        output_path = os.path.join(os.path.join('/tmp', 'processed'), output_filename)
+                        os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
                         
                         with open(output_path, 'wb') as output_file:
                             writer.write(output_file)
@@ -189,7 +191,8 @@ class PDFProcessor:
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}_compressed_{quality}.pdf")
-                output_path = os.path.join("processed", output_filename)
+                output_path = os.path.join(os.path.join('/tmp', 'processed'), output_filename)
+                os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
                 
                 # Create a new document for the compressed version
                 new_doc = fitz.open()
@@ -330,7 +333,8 @@ class PDFProcessor:
                 # Save as text file
                 if output_format in ['txt', 'both']:
                     txt_filename = generate_unique_filename(f"{base_name}_ocr.txt")
-                    txt_output_path = os.path.join("processed", txt_filename)
+                    txt_output_path = os.path.join(os.path.join('/tmp', 'processed'), txt_filename)
+                    os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
                     
                     with open(txt_output_path, 'w', encoding='utf-8') as output_file:
                         output_file.write('\n\n'.join(text_content))
@@ -340,7 +344,8 @@ class PDFProcessor:
                 # Save as searchable PDF
                 if output_format in ['pdf', 'both']:
                     pdf_filename = generate_unique_filename(f"{base_name}_searchable.pdf")
-                    pdf_output_path = os.path.join("processed", pdf_filename)
+                    pdf_output_path = os.path.join(os.path.join('/tmp', 'processed'), pdf_filename)
+                    os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
                     
                     # Create a new PDF with the extracted text
                     from reportlab.pdfgen import canvas
@@ -387,7 +392,8 @@ class PDFProcessor:
                     
                     base_name = os.path.splitext(os.path.basename(file_path))[0]
                     output_filename = generate_unique_filename(f"{base_name}.docx")
-                    output_path = os.path.join("processed", output_filename)
+                    output_path = os.path.join(os.path.join('/tmp', 'processed'), output_filename)
+                    os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
                     
                     doc.save(output_path)
                     output_files.append(output_path)
@@ -420,7 +426,8 @@ class PDFProcessor:
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}_protected.pdf")
-                output_path = os.path.join("processed", output_filename)
+                output_path = os.path.join(os.path.join('/tmp', 'processed'), output_filename)
+                os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
                 
                 with open(output_path, 'wb') as f:
                     writer.write(f)
@@ -450,7 +457,8 @@ class PDFProcessor:
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}_rotated.pdf")
-                output_path = os.path.join("processed", output_filename)
+                output_path = os.path.join(os.path.join('/tmp', 'processed'), output_filename)
+                os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
                 
                 with open(output_path, 'wb') as f:
                     writer.write(f)
@@ -500,7 +508,8 @@ class PDFProcessor:
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}_watermarked.pdf")
-                output_path = os.path.join("processed", output_filename)
+                output_path = os.path.join(os.path.join('/tmp', 'processed'), output_filename)
+                os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
                 
                 with open(output_path, 'wb') as f:
                     writer.write(f)
@@ -1115,8 +1124,10 @@ class PDFProcessor:
         return output_files
 
 def create_zip_archive(file_paths, zip_filename):
-    """Create a ZIP archive from multiple files"""
-    zip_path = os.path.join("processed", zip_filename)
+    """Create a ZIP archive from multiple files in /tmp/processed"""
+    processed_folder = os.path.join('/tmp', 'processed')
+    os.makedirs(processed_folder, exist_ok=True)
+    zip_path = os.path.join(processed_folder, zip_filename)
     
     with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for file_path in file_paths:
