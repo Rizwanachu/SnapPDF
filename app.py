@@ -47,6 +47,10 @@ with app.app_context():
     db.create_all()
     logging.info("Database tables created")
     
+    # Ensure directories exist before cleanup
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
+    
     # Cleanup old files on startup
     from utils import cleanup_old_files
     cleanup_old_files(app.config['UPLOAD_FOLDER'])
