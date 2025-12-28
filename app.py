@@ -19,7 +19,8 @@ app.secret_key = os.environ.get("SESSION_SECRET")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # Configure the database - using SQLite for local storage
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///pdf_tools.db"
+db_path = os.path.join(app.instance_path, 'pdf_tools.db')
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_pre_ping": True,
 }
