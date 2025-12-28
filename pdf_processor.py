@@ -109,8 +109,8 @@ class PDFProcessor:
         """Merge multiple PDF files into one"""
         input_files = json.loads(self.job.input_files)
         output_filename = generate_unique_filename("merged_document.pdf")
-        output_path = os.path.join(os.path.join('/tmp', 'processed'), output_filename)
-        os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
+        output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+        os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
         
         writer = PdfWriter()
         

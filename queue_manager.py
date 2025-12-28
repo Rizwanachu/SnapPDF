@@ -92,10 +92,10 @@ class QueueManager:
             }
     
     def cancel_job(self, job_id):
-        """Cancel a job (mark as cancelled, but can't stop if already processing)"""
+        """Cancel a job"""
         with app.app_context():
             job = ProcessingJob.query.get(job_id)
-            if job and job.status == JobStatus.PENDING:
+            if job and job.status in [JobStatus.PENDING, JobStatus.PROCESSING]:
                 job.status = JobStatus.CANCELLED
                 job.completed_at = datetime.now()
                 db.session.commit()

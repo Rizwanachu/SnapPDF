@@ -12,6 +12,7 @@
     <meta name="theme-color" content="#0d6efd">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon-192.png') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 <body>
     <!-- Navigation -->
@@ -19,7 +20,6 @@
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
                 <img src="{{ url_for('static', filename='logo.png') }}" alt="SnapPDF" style="height: 40px; width: auto; object-fit: contain;" onerror="this.src='https://raw.githubusercontent.com/Rizwanachu/SnapPDF/main/static/logo.png'; this.onerror=null;">
-                <span class="ms-2 fw-bold text-dark h4 mb-0">SnapPDF</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -86,7 +86,6 @@
                 <div class="col-md-6">
                     <div class="d-flex align-items-center mb-3">
                         <img src="{{ url_for('static', filename='logo.png') }}" alt="SnapPDF" style="height: 35px; width: auto;" onerror="this.src='https://raw.githubusercontent.com/Rizwanachu/SnapPDF/main/static/logo.png'; this.onerror=null;">
-                        <span class="ms-2 fw-bold text-dark h5 mb-0">SnapPDF</span>
                     </div>
                     <p class="text-muted small">Powerful PDF processing tools for all your document needs. Secured with SSL encryption and auto-deletion.</p>
                 </div>
