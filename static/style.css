@@ -115,40 +115,67 @@ body {
     transition: color 0.2s ease;
 }
 
-.footer a:hover {
-    color: #f8fafc;
-}
-
-/* Mobile Responsiveness Improvements */
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
     .display-4 {
-        font-size: 2rem !important;
+        font-size: 2.25rem;
     }
     
     .lead {
-        font-size: 1rem !important;
+        font-size: 1.1rem;
     }
     
+    .hero-section {
+        padding: 60px 0;
+        border-bottom-left-radius: 30px;
+        border-bottom-right-radius: 30px;
+    }
+
     .upload-area {
-        padding: 2rem 1rem !important;
+        padding: 40px 20px;
     }
-    
+
     .tool-card .card-body {
-        padding: 1rem !important;
+        padding: 1.25rem;
     }
-    
+
+    .footer {
+        padding: 40px 0 20px;
+        text-align: center;
+    }
+
+    .footer .col-md-6 {
+        margin-bottom: 2rem;
+    }
+
     .navbar-brand img {
         height: 35px;
     }
-    
-    .container {
-        padding-left: 15px;
-        padding-right: 15px;
-    }
-    
-    .row.g-2 {
+}
+
+/* Tool Grid Optimizations for Mobile */
+@media (max-width: 576px) {
+    .row.g-2.g-md-3 {
         --bs-gutter-x: 0.5rem;
         --bs-gutter-y: 0.5rem;
+    }
+    
+    .tool-card .card-body {
+        padding: 1rem;
+        text-align: center;
+    }
+    
+    .tool-card h6 {
+        font-size: 0.85rem;
+    }
+    
+    .tool-card p.small {
+        font-size: 0.7rem !important;
     }
 }
 

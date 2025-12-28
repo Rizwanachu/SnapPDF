@@ -3,15 +3,15 @@
 {% block title %}SnapPDF - Professional PDF Processing{% endblock %}
 
 {% block content %}
-<div class="hero-section" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 100px 0;">
+<div class="hero-section" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 60px 0;">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6">
-                <h1 class="display-3 fw-bold mb-4 text-dark">
+                <h1 class="display-4 fw-bold mb-4 text-dark">
                     Document freedom, <span class="text-primary">delivered instantly.</span>
                 </h1>
-                <p class="lead mb-5 text-secondary" style="font-size: 1.25rem;">
-                    SnapPDF gives you the power to merge, split, compress, and OCR your PDFs with professional accuracy. No software to install, no complicated steps.
+                <p class="lead mb-5 text-secondary">
+                    SnapPDF gives you the power to merge, split, compress, and OCR your PDFs with professional accuracy.
                 </p>
                 <div class="d-grid gap-3 d-sm-flex">
                     <a href="{{ url_for('tools') }}" class="btn btn-primary btn-lg px-5 py-3 fw-bold shadow">
@@ -38,118 +38,68 @@
 <div id="features" class="container py-5 mt-5">
     <div class="row">
         <div class="col-lg-12 text-center mb-5">
-            <h2 class="display-4 fw-bold mb-3">SnapPDF Powers</h2>
-            <p class="fs-5 text-muted">Removing every friction point between you and your documents.</p>
+            <h2 class="display-5 fw-bold mb-3">SnapPDF Powers</h2>
+            <p class="lead text-muted">Removing every friction point between you and your documents.</p>
         </div>
     </div>
 
-    <div class="row g-4">
-        <div class="col-md-6 col-lg-4">
-            <div class="card feature-card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="fas fa-layer-group text-primary mb-3" style="font-size: 3rem;"></i>
-                    <h5 class="card-title">Merge PDFs</h5>
-                    <p class="card-text">Combine multiple PDF files into a single document with preserved quality and formatting.</p>
+    <div class="row g-3 g-md-4">
+        <div class="col-6 col-md-4 col-lg-4">
+            <div class="card feature-card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-3 p-md-4">
+                    <i class="fas fa-layer-group text-primary mb-2 mb-md-3 fs-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title h6 fw-bold mb-1">Merge PDFs</h5>
+                    <p class="card-text text-muted small mb-0 d-none d-sm-block">Combine multiple PDF files into a single document.</p>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6 col-lg-4">
-            <div class="card feature-card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="fas fa-cut text-success mb-3" style="font-size: 3rem;"></i>
-                    <h5 class="card-title">Split PDFs</h5>
-                    <p class="card-text">Extract specific pages or split large documents into smaller, manageable files.</p>
+        <div class="col-6 col-md-4 col-lg-4">
+            <div class="card feature-card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-3 p-md-4">
+                    <i class="fas fa-cut text-success mb-2 mb-md-3 fs-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title h6 fw-bold mb-1">Split PDFs</h5>
+                    <p class="card-text text-muted small mb-0 d-none d-sm-block">Extract specific pages or split large documents.</p>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6 col-lg-4">
-            <div class="card feature-card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="fas fa-compress text-warning mb-3" style="font-size: 3rem;"></i>
-                    <h5 class="card-title">Compress PDFs</h5>
-                    <p class="card-text">Reduce file size without losing quality with our advanced compression algorithms.</p>
+        <div class="col-6 col-md-4 col-lg-4">
+            <div class="card feature-card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-3 p-md-4">
+                    <i class="fas fa-compress text-warning mb-2 mb-md-3 fs-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title h6 fw-bold mb-1">Compress</h5>
+                    <p class="card-text text-muted small mb-0 d-none d-sm-block">Reduce file size without losing quality.</p>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6 col-lg-4">
-            <div class="card feature-card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="fas fa-eye text-info mb-3" style="font-size: 3rem;"></i>
-                    <h5 class="card-title">OCR Text Extraction</h5>
-                    <p class="card-text">Extract text from scanned PDFs using advanced optical character recognition.</p>
+        <div class="col-6 col-md-4 col-lg-4">
+            <div class="card feature-card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-3 p-md-4">
+                    <i class="fas fa-eye text-info mb-2 mb-md-3 fs-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title h6 fw-bold mb-1">OCR Text</h5>
+                    <p class="card-text text-muted small mb-0 d-none d-sm-block">Extract text from scanned PDFs accurately.</p>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6 col-lg-4">
-            <div class="card feature-card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="fas fa-file-word text-primary mb-3" style="font-size: 3rem;"></i>
-                    <h5 class="card-title">Convert to Word</h5>
-                    <p class="card-text">Convert PDF documents to editable Word format while maintaining structure.</p>
+        <div class="col-6 col-md-4 col-lg-4">
+            <div class="card feature-card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-3 p-md-4">
+                    <i class="fas fa-file-word text-primary mb-2 mb-md-3 fs-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title h6 fw-bold mb-1">PDF to Word</h5>
+                    <p class="card-text text-muted small mb-0 d-none d-sm-block">Convert documents to editable Word format.</p>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6 col-lg-4">
-            <div class="card feature-card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="fas fa-file-excel text-success mb-3" style="font-size: 3rem;"></i>
-                    <h5 class="card-title">Convert to Excel</h5>
-                    <p class="card-text">Transform PDF tables and data into Excel spreadsheets for analysis.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="card feature-card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="fas fa-lock text-danger mb-3" style="font-size: 3rem;"></i>
-                    <h5 class="card-title">Protect PDF</h5>
-                    <p class="card-text">Add password protection and encryption to secure your PDF documents.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="card feature-card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="fas fa-unlock text-secondary mb-3" style="font-size: 3rem;"></i>
-                    <h5 class="card-title">Unlock PDF</h5>
-                    <p class="card-text">Remove password protection from locked PDF files.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="card feature-card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="fas fa-water text-info mb-3" style="font-size: 3rem;"></i>
-                    <h5 class="card-title">Watermark PDF</h5>
-                    <p class="card-text">Add text or image watermarks to protect and brand your documents.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="card feature-card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="fas fa-redo text-warning mb-3" style="font-size: 3rem;"></i>
-                    <h5 class="card-title">Rotate Pages</h5>
-                    <p class="card-text">Rotate PDF pages 90°, 180°, or 270° to fix orientation.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="card feature-card h-100">
-                <div class="card-body text-center p-4">
-                    <i class="fas fa-images text-primary mb-3" style="font-size: 3rem;"></i>
-                    <h5 class="card-title">Extract Images</h5>
-                    <p class="card-text">Extract all images from PDF files and download them individually.</p>
+        <div class="col-6 col-md-4 col-lg-4">
+            <div class="card feature-card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-3 p-md-4">
+                    <i class="fas fa-file-excel text-success mb-2 mb-md-3 fs-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title h6 fw-bold mb-1">PDF to Excel</h5>
+                    <p class="card-text text-muted small mb-0 d-none d-sm-block">Transform PDF tables into Excel spreadsheets.</p>
                 </div>
             </div>
         </div>
