@@ -6,7 +6,7 @@ packages = ["freetype", "glibcLocales", "gumbo", "harfbuzz", "jbig2dec", "lcms2"
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["gunicorn", "--bind=0.0.0.0:5000", "--reuse-port", "main:app"]
+run = ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
 
 [workflows]
 runButton = "Project"

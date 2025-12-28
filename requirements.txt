@@ -20,3 +20,15 @@ pillow
 openpyxl
 email-validator
 paypalrestsdk
+docx
+email_validator
+flask
+flask-sqlalchemy
+gunicorn
+oauthlib
+psycopg2-binary
+email-validator
+flask
+flask-sqlalchemy
+gunicorn
+psycopg2-binary
