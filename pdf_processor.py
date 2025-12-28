@@ -47,6 +47,9 @@ class PDFProcessor:
         try:
             self.update_status(JobStatus.PROCESSING)
             
+            # Apply watermark for free users if not already a watermark job
+            is_free_user = not self.job.user.is_premium
+            
             if self.job.job_type == JobType.MERGE:
                 result = self.merge_pdfs()
             elif self.job.job_type == JobType.SPLIT:
@@ -94,6 +97,10 @@ class PDFProcessor:
             else:
                 raise ValueError(f"Unknown job type: {self.job.job_type}")
             
+            # Add watermark for free users to all output PDFs
+            if is_free_user:
+                self.apply_free_tier_watermark(result)
+            
             self.job.output_files = json.dumps(result)
             self.update_status(JobStatus.COMPLETED)
             self.update_progress(100, self.job.total_files)
@@ -105,6 +112,46 @@ class PDFProcessor:
             self.update_status(JobStatus.FAILED, str(e))
             raise
     
+    def apply_free_tier_watermark(self, file_paths):
+        """Add 'Processed with SnapPDF' watermark to free tier files"""
+        if not file_paths:
+            return
+            
+        for i, file_path in enumerate(file_paths):
+            if not file_path.lower().endswith('.pdf'):
+                continue
+                
+            try:
+                from reportlab.pdfgen import canvas
+                from reportlab.lib.colors import grey
+                import io
+                
+                reader = PdfReader(file_path)
+                writer = PdfWriter()
+                
+                for page in reader.pages:
+                    packet = io.BytesIO()
+                    can = canvas.Canvas(packet)
+                    can.setFont("Helvetica", 40)
+                    can.setFillAlpha(0.3)
+                    can.saveState()
+                    can.translate(300, 400)
+                    can.rotate(45)
+                    can.drawCentredString(0, 0, "Processed with SnapPDF Free")
+                    can.restoreState()
+                    can.save()
+                    packet.seek(0)
+                    
+                    watermark = PdfReader(packet).pages[0]
+                    page.merge_page(watermark)
+                    writer.add_page(page)
+                
+                with open(file_path, 'wb') as f:
+                    writer.write(f)
+                    
+            except Exception as e:
+                logger.error(f"Error applying free watermark to {file_path}: {e}")
+
     def merge_pdfs(self):
         """Merge multiple PDF files into one"""
         input_files = json.loads(self.job.input_files)

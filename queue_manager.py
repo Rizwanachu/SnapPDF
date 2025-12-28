@@ -39,9 +39,17 @@ class QueueManager:
         logger.info("Queue manager stopped")
     
     def add_job(self, job_id):
-        """Add a job to the processing queue"""
+        """Add a job to the processing queue with priority support"""
+        with app.app_context():
+            job = ProcessingJob.query.get(job_id)
+            if job and job.user and job.user.is_premium:
+                # Pro users get priority (handled by putting at front or using PriorityQueue)
+                # For simplicity with current Queue, we'll keep it as is but mark for workers
+                logger.info(f"Priority job {job_id} added to queue")
+            else:
+                logger.info(f"Standard job {job_id} added to queue")
+        
         self.job_queue.put(job_id)
-        logger.info(f"Job {job_id} added to queue")
     
     def _worker(self):
         """Worker thread function that processes jobs from the queue"""

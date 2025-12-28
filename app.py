@@ -38,8 +38,8 @@ except Exception as e:
     logging.error(f"Module level directory creation error: {e}")
 app.config["FREE_USER_FILE_LIMIT"] = 5 * 1024 * 1024  # 5MB per file for free users
 app.config["FREE_USER_BATCH_LIMIT"] = 3  # 3 files per batch for free users
-app.config["PRO_USER_FILE_LIMIT"] = 100 * 1024 * 1024  # 100MB per file for pro users
-app.config["PRO_USER_BATCH_LIMIT"] = 100  # 100 files per batch for pro users
+app.config["PRO_USER_FILE_LIMIT"] = 1024 * 1024 * 1024  # 1GB per file for pro users
+app.config["PRO_USER_BATCH_LIMIT"] = 500  # 500 files per batch for pro users
 
 # Initialize the app with the extension
 db.init_app(app)
