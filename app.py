@@ -25,10 +25,10 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_pre_ping": True,
 }
 
-# App configuration
+# Create upload and processed directories in /tmp for Vercel
+app.config["UPLOAD_FOLDER"] = os.path.join('/tmp', 'uploads')
+app.config["PROCESSED_FOLDER"] = os.path.join('/tmp', 'processed')
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100MB max file size
-app.config["UPLOAD_FOLDER"] = "uploads"
-app.config["PROCESSED_FOLDER"] = "processed"
 app.config["FREE_USER_FILE_LIMIT"] = 5 * 1024 * 1024  # 5MB per file for free users
 app.config["FREE_USER_BATCH_LIMIT"] = 3  # 3 files per batch for free users
 app.config["PRO_USER_FILE_LIMIT"] = 100 * 1024 * 1024  # 100MB per file for pro users
