@@ -41,6 +41,9 @@ db.init_app(app)
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 os.makedirs(app.config["PROCESSED_FOLDER"], exist_ok=True)
 
+# Helper to check if running on Vercel
+IS_VERCEL = "VERCEL" in os.environ
+
 with app.app_context():
     # Import models to create tables
     import models  # noqa: F401
@@ -51,10 +54,11 @@ with app.app_context():
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
     
-    # Cleanup old files on startup
-    from utils import cleanup_old_files
-    cleanup_old_files(app.config['UPLOAD_FOLDER'])
-    cleanup_old_files(app.config['PROCESSED_FOLDER'])
+    # Cleanup old files on startup (only if not on Vercel to avoid cold start overhead)
+    if not IS_VERCEL:
+        from utils import cleanup_old_files
+        cleanup_old_files(app.config['UPLOAD_FOLDER'])
+        cleanup_old_files(app.config['PROCESSED_FOLDER'])
 
 # Import routes after app is configured
 import routes  # noqa: F401
