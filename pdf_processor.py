@@ -196,8 +196,8 @@ class PDFProcessor:
                         writer.add_page(page)
                         
                         output_filename = generate_unique_filename(f"{base_name}_page_{page_num + 1}.pdf")
-                        output_path = os.path.join(os.path.join('/tmp', 'processed'), output_filename)
-                        os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
+                        output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                        os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                         
                         with open(output_path, 'wb') as output_file:
                             writer.write(output_file)
@@ -238,8 +238,8 @@ class PDFProcessor:
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}_compressed_{quality}.pdf")
-                output_path = os.path.join(os.path.join('/tmp', 'processed'), output_filename)
-                os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
+                output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                 
                 # Create a new document for the compressed version
                 new_doc = fitz.open()
@@ -289,7 +289,8 @@ class PDFProcessor:
                         
                         base_name = os.path.splitext(os.path.basename(file_path))[0]
                         output_filename = generate_unique_filename(f"{base_name}_compressed_{quality}.pdf")
-                        output_path = os.path.join("processed", output_filename)
+                        output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                        os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                         
                         with open(output_path, 'wb') as output_file:
                             writer.write(output_file)
@@ -380,8 +381,8 @@ class PDFProcessor:
                 # Save as text file
                 if output_format in ['txt', 'both']:
                     txt_filename = generate_unique_filename(f"{base_name}_ocr.txt")
-                    txt_output_path = os.path.join(os.path.join('/tmp', 'processed'), txt_filename)
-                    os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
+                    txt_output_path = os.path.join(app.config['PROCESSED_FOLDER'], txt_filename)
+                    os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                     
                     with open(txt_output_path, 'w', encoding='utf-8') as output_file:
                         output_file.write('\n\n'.join(text_content))
@@ -391,8 +392,8 @@ class PDFProcessor:
                 # Save as searchable PDF
                 if output_format in ['pdf', 'both']:
                     pdf_filename = generate_unique_filename(f"{base_name}_searchable.pdf")
-                    pdf_output_path = os.path.join(os.path.join('/tmp', 'processed'), pdf_filename)
-                    os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
+                    pdf_output_path = os.path.join(app.config['PROCESSED_FOLDER'], pdf_filename)
+                    os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                     
                     # Create a new PDF with the extracted text
                     from reportlab.pdfgen import canvas
@@ -439,8 +440,8 @@ class PDFProcessor:
                     
                     base_name = os.path.splitext(os.path.basename(file_path))[0]
                     output_filename = generate_unique_filename(f"{base_name}.docx")
-                    output_path = os.path.join(os.path.join('/tmp', 'processed'), output_filename)
-                    os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
+                    output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                    os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                     
                     doc.save(output_path)
                     output_files.append(output_path)
@@ -473,8 +474,8 @@ class PDFProcessor:
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}_protected.pdf")
-                output_path = os.path.join(os.path.join('/tmp', 'processed'), output_filename)
-                os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
+                output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                 
                 with open(output_path, 'wb') as f:
                     writer.write(f)
@@ -504,8 +505,8 @@ class PDFProcessor:
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}_rotated.pdf")
-                output_path = os.path.join(os.path.join('/tmp', 'processed'), output_filename)
-                os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
+                output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                 
                 with open(output_path, 'wb') as f:
                     writer.write(f)
@@ -555,8 +556,8 @@ class PDFProcessor:
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}_watermarked.pdf")
-                output_path = os.path.join(os.path.join('/tmp', 'processed'), output_filename)
-                os.makedirs(os.path.join('/tmp', 'processed'), exist_ok=True)
+                output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                 
                 with open(output_path, 'wb') as f:
                     writer.write(f)
@@ -590,7 +591,8 @@ class PDFProcessor:
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}_unlocked.pdf")
-                output_path = os.path.join("processed", output_filename)
+                output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                 
                 with open(output_path, 'wb') as f:
                     writer.write(f)
@@ -623,7 +625,8 @@ class PDFProcessor:
                         image_ext = base_image["ext"]
                         
                         output_filename = generate_unique_filename(f"{base_name}_p{page_num+1}_img{img_idx+1}.{image_ext}")
-                        output_path = os.path.join("processed", output_filename)
+                        output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                        os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                         
                         with open(output_path, "wb") as f:
                             f.write(image_bytes)
@@ -676,7 +679,8 @@ class PDFProcessor:
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 suffix = self.job.job_type.value
                 output_filename = generate_unique_filename(f"{base_name}_{suffix}.pdf")
-                output_path = os.path.join("processed", output_filename)
+                output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                 
                 with open(output_path, 'wb') as f:
                     writer.write(f)
@@ -699,7 +703,8 @@ class PDFProcessor:
                 for page in reader.pages:
                     writer.add_page(page)
                 output_filename = generate_unique_filename("repaired.pdf")
-                output_path = os.path.join("processed", output_filename)
+                output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                 with open(output_path, 'wb') as f:
                     writer.write(f)
                 output_files.append(output_path)
@@ -721,7 +726,8 @@ class PDFProcessor:
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}.xlsx")
-                output_path = os.path.join("processed", output_filename)
+                output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                 wb.save(output_path)
                 output_files.append(output_path)
                 
@@ -849,7 +855,8 @@ class PDFProcessor:
                         page = doc[page_num]
                         pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
                         output_filename = generate_unique_filename(f"{base_name}_page_{page_num+1}.jpg")
-                        output_path = os.path.join("processed", output_filename)
+                        output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                        os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                         pix.save(output_path)
                         output_files.append(output_path)
                 
@@ -866,7 +873,7 @@ class PDFProcessor:
                         page = doc[page_num]
                         pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
                         img_filename = generate_unique_filename(f"temp_slide_{page_num}.png")
-                        img_path = os.path.join("temp", img_filename)
+                        img_path = os.path.join("/tmp", img_filename)
                         pix.save(img_path)
                         
                         slide = prs.slides.add_slide(prs.slide_layouts[6]) # blank slide
@@ -875,7 +882,8 @@ class PDFProcessor:
                             os.remove(img_path)
                             
                     output_filename = generate_unique_filename(f"{base_name}.pptx")
-                    output_path = os.path.join("processed", output_filename)
+                    output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                    os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                     prs.save(output_path)
                     output_files.append(output_path)
                 
@@ -896,14 +904,16 @@ class PDFProcessor:
                                 row += 1
                                 
                     output_filename = generate_unique_filename(f"{base_name}.xlsx")
-                    output_path = os.path.join("processed", output_filename)
+                    output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                    os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                     wb.save(output_path)
                     output_files.append(output_path)
                 
                 elif self.job.job_type == JobType.PDF_TO_PDFA:
                     # PDF to PDF/A - Simplified archive format
                     output_filename = generate_unique_filename(f"{base_name}_pdfa.pdf")
-                    output_path = os.path.join("processed", output_filename)
+                    output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                    os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                     doc.save(output_path, garbage=4, deflate=True, clean=True)
                     output_files.append(output_path)
                 
@@ -951,7 +961,8 @@ class PDFProcessor:
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}_numbered.pdf")
-                output_path = os.path.join("processed", output_filename)
+                output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                 
                 with open(output_path, 'wb') as f:
                     writer.write(f)
@@ -998,7 +1009,8 @@ class PDFProcessor:
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}_cropped.pdf")
-                output_path = os.path.join("processed", output_filename)
+                output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                 
                 with open(output_path, 'wb') as f:
                     writer.write(f)
@@ -1041,7 +1053,8 @@ class PDFProcessor:
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}_edited.pdf")
-                output_path = os.path.join("processed", output_filename)
+                output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                 
                 with open(output_path, 'wb') as f:
                     writer.write(f)
@@ -1084,7 +1097,8 @@ class PDFProcessor:
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}_signed.pdf")
-                output_path = os.path.join("processed", output_filename)
+                output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                 with open(output_path, 'wb') as f:
                     writer.write(f)
                 output_files.append(output_path)
@@ -1112,7 +1126,8 @@ class PDFProcessor:
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}_redacted.pdf")
-                output_path = os.path.join("processed", output_filename)
+                output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                 doc.save(output_path)
                 doc.close()
                 output_files.append(output_path)
@@ -1129,7 +1144,8 @@ class PDFProcessor:
             return []
         
         report_filename = generate_unique_filename("comparison_report.txt")
-        report_path = os.path.join("processed", report_filename)
+        report_path = os.path.join(app.config['PROCESSED_FOLDER'], report_filename)
+        os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
         with open(report_path, "w") as f:
             f.write("PDF Comparison Report\n")
             f.write("=====================\n\n")
@@ -1159,7 +1175,8 @@ class PDFProcessor:
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
                 output_filename = generate_unique_filename(f"{base_name}.xlsx")
-                output_path = os.path.join("processed", output_filename)
+                output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
+                os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
                 wb.save(output_path)
                 output_files.append(output_path)
                 
@@ -1171,8 +1188,9 @@ class PDFProcessor:
         return output_files
 
 def create_zip_archive(file_paths, zip_filename):
-    """Create a ZIP archive from multiple files in /tmp/processed"""
-    processed_folder = os.path.join('/tmp', 'processed')
+    """Create a ZIP archive from multiple files in PROCESSED_FOLDER"""
+    from app import app
+    processed_folder = app.config['PROCESSED_FOLDER']
     os.makedirs(processed_folder, exist_ok=True)
     zip_path = os.path.join(processed_folder, zip_filename)
     
