@@ -12,7 +12,7 @@ import openpyxl
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from app import db
-from models import ProcessingJob, JobStatus, JobType
+from models import ProcessingJob, JobStatus, JobType, get_now
 from utils import generate_unique_filename
 
 logger = logging.getLogger(__name__)
@@ -37,9 +37,9 @@ class PDFProcessor:
         if error_message:
             self.job.error_message = error_message
         if status == JobStatus.PROCESSING:
-            self.job.started_at = datetime.now()
+            self.job.started_at = get_now()
         elif status in [JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED]:
-            self.job.completed_at = datetime.now()
+            self.job.completed_at = get_now()
         db.session.commit()
     
     def process_job(self):

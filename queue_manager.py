@@ -5,7 +5,7 @@ import time
 from queue import Queue
 from datetime import datetime
 from app import app, db
-from models import ProcessingJob, JobStatus
+from models import ProcessingJob, JobStatus, get_now
 from pdf_processor import PDFProcessor
 
 logger = logging.getLogger(__name__)
@@ -105,7 +105,7 @@ class QueueManager:
             job = ProcessingJob.query.get(job_id)
             if job and job.status in [JobStatus.PENDING, JobStatus.PROCESSING]:
                 job.status = JobStatus.CANCELLED
-                job.completed_at = datetime.now()
+                job.completed_at = get_now()
                 db.session.commit()
                 return True
             return False

@@ -53,6 +53,12 @@ class SubscriptionStatus(Enum):
     PENDING = "pending"
 
 # (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
+import pytz
+
+def get_now():
+    """Get current time in Dubai (GST)"""
+    return datetime.now(pytz.timezone('Asia/Dubai'))
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.String, primary_key=True)
@@ -63,8 +69,8 @@ class User(UserMixin, db.Model):
     profile_image_url = db.Column(db.String, nullable=True)
     is_premium = db.Column(db.Boolean, default=False)
     
-    created_at = db.Column(db.DateTime, default=datetime.now)
-    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    created_at = db.Column(db.DateTime, default=get_now)
+    updated_at = db.Column(db.DateTime, default=get_now, onupdate=get_now)
     
     # Relationship with jobs
     jobs = db.relationship('ProcessingJob', backref='user', lazy=True, cascade='all, delete-orphan')

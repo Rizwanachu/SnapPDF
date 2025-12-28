@@ -8,7 +8,7 @@ from flask import session, render_template, request, redirect, url_for, flash, j
 from werkzeug.utils import secure_filename
 from flask_login import current_user, login_user, logout_user, login_required
 from app import app, db
-from models import ProcessingJob, JobStatus, JobType, FileUpload, User, Subscription, SubscriptionStatus
+from models import ProcessingJob, JobStatus, JobType, FileUpload, User, Subscription, SubscriptionStatus, get_now
 from forms import RegistrationForm, LoginForm
 from queue_manager import get_queue_manager, start_queue_manager
 from pdf_processor import create_zip_archive
@@ -536,8 +536,8 @@ def create_premium_subscription():
         subscription.user_id = current_user.id
         subscription.paypal_subscription_id = "verified_" + str(uuid.uuid4())[:8]
         subscription.status = SubscriptionStatus.ACTIVE
-        subscription.activated_at = datetime.now()
-        subscription.expires_at = datetime.now() + timedelta(days=30)
+        subscription.activated_at = get_now()
+        subscription.expires_at = get_now() + timedelta(days=30)
         subscription.amount = amount
         subscription.currency = currency
         subscription.plan_name = plan_name
