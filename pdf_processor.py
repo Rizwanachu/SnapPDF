@@ -23,6 +23,10 @@ class PDFProcessor:
         self.job = ProcessingJob.query.get(job_id)
         if not self.job:
             raise ValueError(f"Job {job_id} not found")
+        
+        # Unique output directory for this job
+        self.output_dir = os.path.join(app.config['PROCESSED_FOLDER'], str(self.job.user_id), str(self.job_id))
+        os.makedirs(self.output_dir, exist_ok=True)
     
     def update_progress(self, progress, processed_files=None):
         """Update job progress in database"""
@@ -155,9 +159,8 @@ class PDFProcessor:
     def merge_pdfs(self):
         """Merge multiple PDF files into one"""
         input_files = json.loads(self.job.input_files)
-        output_filename = generate_unique_filename("merged_document.pdf")
-        output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
-        os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
+        output_filename = f"merged_{self.job_id}.pdf"
+        output_path = os.path.join(self.output_dir, output_filename)
         
         writer = PdfWriter()
         
@@ -195,9 +198,8 @@ class PDFProcessor:
                         writer = PdfWriter()
                         writer.add_page(page)
                         
-                        output_filename = generate_unique_filename(f"{base_name}_page_{page_num + 1}.pdf")
-                        output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
-                        os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
+                        output_filename = f"{base_name}_page_{page_num + 1}_{self.job_id}.pdf"
+                        output_path = os.path.join(self.output_dir, output_filename)
                         
                         with open(output_path, 'wb') as output_file:
                             writer.write(output_file)
@@ -237,9 +239,8 @@ class PDFProcessor:
                 doc = fitz.open(file_path)
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
-                output_filename = generate_unique_filename(f"{base_name}_compressed_{quality}.pdf")
-                output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
-                os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
+                output_filename = f"{base_name}_compressed_{quality}_{self.job_id}.pdf"
+                output_path = os.path.join(self.output_dir, output_filename)
                 
                 # Create a new document for the compressed version
                 new_doc = fitz.open()
@@ -380,9 +381,8 @@ class PDFProcessor:
                 
                 # Save as text file
                 if output_format in ['txt', 'both']:
-                    txt_filename = generate_unique_filename(f"{base_name}_ocr.txt")
-                    txt_output_path = os.path.join(app.config['PROCESSED_FOLDER'], txt_filename)
-                    os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
+                    txt_filename = f"{base_name}_ocr_{self.job_id}.txt"
+                    txt_output_path = os.path.join(self.output_dir, txt_filename)
                     
                     with open(txt_output_path, 'w', encoding='utf-8') as output_file:
                         output_file.write('\n\n'.join(text_content))
@@ -391,9 +391,8 @@ class PDFProcessor:
                 
                 # Save as searchable PDF
                 if output_format in ['pdf', 'both']:
-                    pdf_filename = generate_unique_filename(f"{base_name}_searchable.pdf")
-                    pdf_output_path = os.path.join(app.config['PROCESSED_FOLDER'], pdf_filename)
-                    os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
+                    pdf_filename = f"{base_name}_searchable_{self.job_id}.pdf"
+                    pdf_output_path = os.path.join(self.output_dir, pdf_filename)
                     
                     # Create a new PDF with the extracted text
                     from reportlab.pdfgen import canvas
@@ -439,9 +438,8 @@ class PDFProcessor:
                             doc.add_paragraph(text)
                     
                     base_name = os.path.splitext(os.path.basename(file_path))[0]
-                    output_filename = generate_unique_filename(f"{base_name}.docx")
-                    output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
-                    os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
+                    output_filename = f"{base_name}_{self.job_id}.docx"
+                    output_path = os.path.join(self.output_dir, output_filename)
                     
                     doc.save(output_path)
                     output_files.append(output_path)
@@ -473,9 +471,8 @@ class PDFProcessor:
                 writer.encrypt(password)
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
-                output_filename = generate_unique_filename(f"{base_name}_protected.pdf")
-                output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
-                os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
+                output_filename = f"{base_name}_protected_{self.job_id}.pdf"
+                output_path = os.path.join(self.output_dir, output_filename)
                 
                 with open(output_path, 'wb') as f:
                     writer.write(f)
@@ -504,9 +501,8 @@ class PDFProcessor:
                     writer.add_page(page)
                 
                 base_name = os.path.splitext(os.path.basename(file_path))[0]
-                output_filename = generate_unique_filename(f"{base_name}_rotated.pdf")
-                output_path = os.path.join(app.config['PROCESSED_FOLDER'], output_filename)
-                os.makedirs(app.config['PROCESSED_FOLDER'], exist_ok=True)
+                output_filename = f"{base_name}_rotated_{self.job_id}.pdf"
+                output_path = os.path.join(self.output_dir, output_filename)
                 
                 with open(output_path, 'wb') as f:
                     writer.write(f)

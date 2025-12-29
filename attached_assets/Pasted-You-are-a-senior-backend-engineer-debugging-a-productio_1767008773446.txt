@@ -1,0 +1,93 @@
+You are a senior backend engineer debugging a production Flask SaaS app.
+
+BUG DESCRIPTION (CRITICAL):
+No matter which PDF tool is used (PDF to Word, PDF to JPG, Merge, Compress, etc.), the downloaded file is ALWAYS the same ZIP file.
+The processing appears successful, but the download endpoint always returns the wrong output.
+
+This happens for ALL tools.
+
+GOAL:
+Fix the root cause so that:
+- Each job returns ONLY its own correct output
+- Different tools generate different outputs
+- Downloads are accurate, isolated, and correct
+- ZIP files contain the correct processed files
+- No job ever overwrites another job’s output
+
+YOU MUST DO ALL OF THE FOLLOWING:
+
+1️⃣ JOB OUTPUT ISOLATION
+- Ensure EVERY ProcessingJob has its own unique output directory
+- Output paths must include job_id (UUID)
+- Never reuse a shared folder like /processed or /temp without job scoping
+- Ensure concurrent jobs do not overwrite files
+
+Example requirement:
+processed/<user_id>/<job_id>/
+or
+/tmp/snapdf/<job_id>/
+
+2️⃣ FIX OUTPUT PATH LOGIC
+- Audit pdf_processor.py and queue_manager.py
+- Ensure each tool writes output to job.output_paths (JSON field)
+- Ensure output paths are saved AFTER processing
+- Ensure job.result_files references the correct files for THAT job
+
+3️⃣ FIX ZIP CREATION LOGIC
+- Ensure ZIP creation uses ONLY job-specific output paths
+- Do NOT zip a global folder
+- Do NOT reuse old ZIP filenames
+- ZIP filename must be unique per job (job_id.zip)
+
+4️⃣ FIX DOWNLOAD ENDPOINT
+- /download/<job_id> must:
+  - Fetch the job by ID
+  - Validate ownership (user_id)
+  - Read ONLY that job’s output paths
+  - Return the correct file or ZIP
+- Do NOT cache file paths globally
+- Do NOT store output path in a global variable
+
+5️⃣ REMOVE SHARED STATE BUGS
+- Eliminate any:
+  - global output_path variables
+  - reused temp filenames
+  - static ZIP names like results.zip
+- Ensure thread-safe behavior in queue_manager
+
+6️⃣ VERIFY TOOL-SPECIFIC OUTPUT
+- PDF → Word returns .docx
+- PDF → JPG returns .jpg/.zip
+- Merge returns merged PDF
+- Compress returns compressed PDF
+- OCR returns searchable PDF
+- Ensure file extensions match tool output
+
+7️⃣ CLEANUP & SAFETY
+- Ensure failed jobs do not leave stale outputs
+- Ensure completed jobs cannot be overwritten
+- Ensure file existence is verified before download
+- Add logging for:
+  - job_id
+  - tool_type
+  - output paths
+
+OUTPUT REQUIRED:
+- Show EXACT code fixes
+- Provide updated versions of:
+  - queue_manager.py
+  - pdf_processor.py
+  - routes.py (download endpoint)
+  - models.py (if output_paths needs fixing)
+- No pseudocode
+- No explanations
+- No assumptions
+- Production-ready fixes only
+
+IMPORTANT:
+- Do NOT simplify the app
+- Do NOT remove features
+- Do NOT ask questions
+- Treat this as a real-money SaaS bug affecting all users
+
+Start debugging now and fix the issue completely.

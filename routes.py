@@ -200,6 +200,32 @@ def cancel_job(job_id):
     else:
         return jsonify({'error': 'Job cannot be cancelled (already processing or completed)'}), 400
 
+def create_zip_archive(file_paths, zip_filename, job_id=None):
+    """Create a ZIP archive of processed files"""
+    import zipfile
+    import os
+    from flask import current_app
+    
+    processed_dir = current_app.config['PROCESSED_FOLDER']
+    if job_id:
+        # If job_id is provided, we can find the specific output directory
+        # This assumes we know the user_id or can find the job to get it
+        from models import ProcessingJob
+        job = ProcessingJob.query.get(job_id)
+        if job:
+            job_dir = os.path.join(processed_dir, str(job.user_id), str(job_id))
+            zip_path = os.path.join(job_dir, zip_filename)
+        else:
+            zip_path = os.path.join(processed_dir, zip_filename)
+    else:
+        zip_path = os.path.join(processed_dir, zip_filename)
+        
+    with zipfile.ZipFile(zip_path, 'w') as zipf:
+        for file_path in file_paths:
+            if os.path.exists(file_path):
+                zipf.write(file_path, os.path.basename(file_path))
+    return zip_path
+
 @app.route('/download/<job_id>')
 @login_required
 def download_job_results(job_id):
@@ -209,12 +235,16 @@ def download_job_results(job_id):
     if not job.output_files:
         abort(404)
     output_files = json.loads(job.output_files)
+    if not output_files:
+        abort(404)
+        
     if len(output_files) == 1:
         file_path = output_files[0]
         if os.path.exists(file_path):
             return send_file(file_path, as_attachment=True)
-    zip_filename = f"job_{job_id}_results.zip"
-    zip_path = create_zip_archive(output_files, zip_filename)
+            
+    zip_filename = f"results_{job_id}.zip"
+    zip_path = create_zip_archive(output_files, zip_filename, job_id=job_id)
     if os.path.exists(zip_path):
         return send_file(zip_path, as_attachment=True, download_name=zip_filename)
     abort(404)
