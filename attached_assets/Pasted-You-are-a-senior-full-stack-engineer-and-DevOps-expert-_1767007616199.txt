@@ -1,0 +1,87 @@
+You are a senior full-stack engineer and DevOps expert.
+
+I have an existing Flask app called SnapPDF with all features already implemented (authentication, PDF tools, job queue, subscriptions, uploads, previews). The app runs correctly on Replit at port 5000, but I want it to work flawlessly AFTER deployment on Vercel.
+
+Your task is to AUDIT, FIX, and FINALIZE the app so that EVERY FEATURE works correctly in production on Vercel.
+
+STRICT REQUIREMENTS:
+- Do NOT remove or simplify any existing features
+- Do NOT change business logic
+- Fix deployment, persistence, routing, background jobs, and file handling issues
+- App must work both locally and on Vercel without code duplication
+
+GOALS:
+1. Make the Flask app fully compatible with Vercel serverless deployment
+2. Ensure all routes work on refresh (no 404s)
+3. Ensure background job processing works reliably
+4. Ensure file uploads, processing, previews, and downloads work
+5. Ensure database persists correctly
+6. Ensure free vs premium limits are enforced correctly
+7. Ensure security, sessions, and auth remain intact
+
+DO ALL OF THE FOLLOWING:
+
+BACKEND & SERVER:
+- Refactor app initialization to use application factory pattern if needed
+- Ensure Gunicorn is configured correctly
+- Ensure Flask app is exposed as `app` for Vercel
+- Add proper `vercel.json` with routes rewrites
+- Ensure all routes like /tool/<id>, /job/<id>/status, /download/<id> work on refresh
+- Ensure static files and templates load correctly
+
+DATABASE:
+- Use PostgreSQL in production and SQLite locally
+- Read DATABASE_URL from environment variables
+- Ensure SQLAlchemy handles serverless connections safely
+- Ensure migrations or table creation logic does not break on cold starts
+
+FILE STORAGE:
+- Ensure uploads/, processed/, temp/ directories are created at runtime
+- Handle Vercel’s ephemeral filesystem safely
+- Use /tmp when required
+- Ensure file previews and ZIP downloads still work
+- Ensure unique filenames and cleanup logic
+
+JOB QUEUE:
+- Replace unsafe threading if required
+- Ensure background jobs do not block requests
+- Ensure job progress (0–100%) updates correctly
+- Ensure job cancellation works
+- Ensure queue survives concurrent requests safely
+
+AUTH & SESSIONS:
+- Ensure Flask-Login works in production
+- Ensure secret keys and session configs are production-safe
+- Ensure JWT tokens (if used) are secure
+- Ensure email validation still works
+
+PREMIUM & SUBSCRIPTIONS:
+- Ensure premium limits (file count, size) are enforced
+- Ensure subscription activation, cancellation, expiry logic works
+- Ensure 30-day auto-renew logic is stable
+- Ensure PayPal IDs are stored safely (no hardcoding)
+
+SECURITY:
+- Validate file types strictly
+- Prevent path traversal
+- Prevent oversized uploads
+- Sanitize filenames
+- Ensure CSRF protection remains active
+
+OUTPUT REQUIRED:
+1. Modify existing files ONLY when necessary
+2. Show exact code changes (full updated files if needed)
+3. Provide:
+   - Final `vercel.json`
+   - Final `requirements.txt`
+   - Any necessary environment variables list
+4. Ensure the app deploys successfully on Vercel and works 100%
+
+IMPORTANT:
+- Do NOT explain concepts
+- Do NOT ask questions
+- Do NOT give partial fixes
+- Assume all listed features already exist and must remain working
+- Treat this as a production-grade SaaS launch
+
+Start now and fix everything end-to-end.
