@@ -3,13 +3,49 @@
   "builds": [
     {
       "src": "main.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "250mb",
+        "pythonVersion": "3.11"
+      }
     }
   ],
   "routes": [
     {
       "src": "/static/(.*)",
       "dest": "/static/$1"
+    },
+    {
+      "src": "/preview/(.*)",
+      "dest": "main.py"
+    },
+    {
+      "src": "/preview-processed/(.*)",
+      "dest": "main.py"
+    },
+    {
+      "src": "/job/(.*)/status",
+      "dest": "main.py"
+    },
+    {
+      "src": "/job/(.*)/cancel",
+      "dest": "main.py"
+    },
+    {
+      "src": "/download/(.*)",
+      "dest": "main.py"
+    },
+    {
+      "src": "/download/file/(.*)",
+      "dest": "main.py"
+    },
+    {
+      "src": "/file-info/(.*)",
+      "dest": "main.py"
+    },
+    {
+      "src": "/tool/(.*)",
+      "dest": "main.py"
     },
     {
       "src": "/(.*)",
