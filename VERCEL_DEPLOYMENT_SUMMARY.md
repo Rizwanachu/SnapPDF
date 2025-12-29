@@ -36,7 +36,7 @@ All critical configurations have been updated for seamless Vercel deployment.
 
 6. **routes.py**
    - ✅ Fixed batch limits to use app.config values
-   - ✅ All 26 PDF tools functional
+   - ✅ All 29 PDF tools functional
    - ✅ Premium tier enforcement working
    - ✅ File upload/download working
 
@@ -63,7 +63,7 @@ PAYPAL_CLIENT_SECRET=<optional>
 ### Key Features Maintained
 
 ✅ User Authentication (registration, login, logout)
-✅ 26 PDF Processing Tools (merge, split, convert, edit, secure, etc.)
+✅ 29 PDF Processing Tools (merge, split, convert, edit, secure, etc.)
 ✅ Premium Subscription System ($4.99/month with 30-day auto-renewal)
 ✅ Free vs Premium Tier Enforcement
   - Free: 3 files per batch, 5MB file size limit

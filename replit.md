@@ -1,7 +1,7 @@
 # SnapPDF - Production Deployment Guide
 
 ## Overview
-SnapPDF is a comprehensive Flask-based PDF processing platform with user authentication, job queue system, premium subscriptions, and 26+ PDF manipulation tools.
+SnapPDF is a comprehensive Flask-based PDF processing platform with user authentication, job queue system, premium subscriptions, and 29 PDF manipulation tools.
 
 **Status**: Ready for Vercel deployment with PostgreSQL support
 
@@ -44,8 +44,8 @@ See `.env.example` for all available options.
 - Password hashing using Werkzeug
 - User profiles with premium tier tracking
 
-### PDF Processing Tools (26 tools)
-- **Organize**: Merge, Split, Extract Images, Remove/Extract Pages
+### PDF Processing Tools (29 tools)
+- **Organize**: Merge, Split, Extract Images, Remove Pages, Extract Pages, Organize
 - **Optimize**: Compress, Repair, OCR
 - **Convert to PDF**: JPG, Word, PowerPoint, Excel, HTML
 - **Convert from PDF**: JPG, Word, PowerPoint, Excel, PDF/A
