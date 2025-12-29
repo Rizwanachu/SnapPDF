@@ -1,0 +1,144 @@
+You are a senior full-stack engineer fixing a broken production Flask SaaS app.
+
+APP NAME:
+SnapPDF – a PDF processing platform similar to ilovepdf.com
+
+CURRENT PROBLEMS (CRITICAL):
+1. The UX flow is wrong
+2. Tools are not actually processing files correctly
+3. Cancelling a job throws errors
+4. Outputs are unreliable
+5. Job state handling is broken
+
+GOAL:
+Make SnapPDF behave EXACTLY like ilovepdf.com:
+→ User selects a tool first
+→ Then uploads files
+→ Then clicks a CTA button
+→ Job processes
+→ Correct output is generated
+→ User downloads the correct result
+→ Job can be cancelled safely at any time
+
+DO NOT REMOVE FEATURES.
+DO NOT SIMPLIFY.
+DO NOT ASK QUESTIONS.
+FIX EVERYTHING END-TO-END.
+
+────────────────────────
+1️⃣ TOOL-FIRST FLOW (MANDATORY)
+────────────────────────
+Implement ilovepdf-style flow:
+
+- /tools page lists all tools
+- Clicking a tool opens /tool/<tool_id>
+- ONLY after tool selection:
+  - File upload is allowed
+  - CTA button appears (e.g. “Convert to Word”)
+- Upload endpoint must KNOW which tool is active
+- Tool ID must be stored in:
+  - session OR
+  - hidden form field OR
+  - job record
+
+STRICT RULE:
+A job CANNOT be created unless a tool is explicitly selected.
+
+────────────────────────
+2️⃣ FIX TOOL EXECUTION (BROKEN)
+────────────────────────
+- Audit pdf_processor.py
+- Ensure each tool has its OWN handler
+- Ensure correct input → output mapping
+- Ensure output file extensions match tool:
+  - PDF → Word → .docx
+  - PDF → JPG → .jpg / ZIP
+  - Merge → .pdf
+  - Compress → .pdf
+  - OCR → searchable .pdf
+
+NO TOOL may:
+- Reuse output paths
+- Overwrite another tool’s output
+- Return placeholder or test files
+
+────────────────────────
+3️⃣ JOB SYSTEM (FIX COMPLETELY)
+────────────────────────
+- Each job must have:
+  - job_id (UUID)
+  - tool_id
+  - status
+  - progress
+  - output_paths (JSON)
+- Each job MUST have its own directory:
+  /tmp/snapdf/<job_id>/
+
+NO shared folders.
+NO static filenames.
+NO global variables.
+
+────────────────────────
+4️⃣ FIX CANCEL JOB ERROR (CRITICAL)
+────────────────────────
+Cancel button MUST:
+- Work at ANY stage (Pending / Processing)
+- Never throw exceptions
+- Gracefully stop processing
+- Mark job as Cancelled
+- Clean temp files safely
+
+DO NOT:
+- Kill threads unsafely
+- Delete files still in use
+- Leave corrupted job state
+
+────────────────────────
+5️⃣ DOWNLOAD SYSTEM (ILOVEPDF-LIKE)
+────────────────────────
+- Download button appears ONLY after completion
+- /download/<job_id> must:
+  - Validate user ownership
+  - Validate job completion
+  - Return ONLY that job’s output
+- ZIP files must be job-specific
+- No reused ZIPs
+- No stale outputs
+
+────────────────────────
+6️⃣ FRONTEND FIXES
+────────────────────────
+- Disable CTA until files uploaded
+- Show progress bar (0–100%)
+- Show clear job states:
+  Pending → Processing → Completed / Cancelled / Failed
+- Hide download button until job is completed
+- Show clean error messages (no stack traces)
+
+────────────────────────
+7️⃣ SAFETY & PRODUCTION RULES
+────────────────────────
+- Thread-safe job queue
+- No shared state
+- File validation
+- Size limits enforced
+- Cleanup on failure/cancel
+- Logging per job_id
+
+────────────────────────
+OUTPUT REQUIRED:
+- Exact code fixes (NO pseudocode)
+- Updated versions of:
+  - routes.py
+  - queue_manager.py
+  - pdf_processor.py
+  - templates (tool pages)
+  - models.py (if needed)
+- Final result must behave like ilovepdf.com
+
+IMPORTANT:
+- Assume this app has paying users
+- Treat this as a real SaaS outage
+- Fix root causes, not symptoms
+
+START NOW AND FIX EVERYTHING.

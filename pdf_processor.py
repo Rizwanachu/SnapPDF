@@ -49,13 +49,25 @@ class PDFProcessor:
     def process_job(self):
         """Main processing function that routes to specific processors"""
         try:
+            # Check if job was cancelled before starting
+            if self.job.status == JobStatus.CANCELLED:
+                logger.info(f"Job {self.job_id} was cancelled before starting")
+                return None
+
             self.update_status(JobStatus.PROCESSING)
             
             # Apply watermark for free users if not already a watermark job
             is_free_user = not self.job.user.is_premium
             
+            # Helper to check for cancellation during processing
+            def check_cancel():
+                db.session.refresh(self.job)
+                if self.job.status == JobStatus.CANCELLED:
+                    raise Exception("Job cancelled by user")
+
             if self.job.job_type == JobType.MERGE:
                 result = self.merge_pdfs()
+            # ... other tools ...
             elif self.job.job_type == JobType.SPLIT:
                 result = self.split_pdfs()
             elif self.job.job_type == JobType.COMPRESS:
